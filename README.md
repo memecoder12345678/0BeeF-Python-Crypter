@@ -1,2 +1,2 @@
-# 0BeeF Python Obfuscator
-Python Obfuscator 🥩
+# 0BeeF Python Crypte
+Python Crypte 🥩
