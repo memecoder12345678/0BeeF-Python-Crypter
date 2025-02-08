@@ -1,2 +1,2 @@
-# 0BeeF Python Crypte
-Python Crypte 🥩
+# 0BeeF Python Crypter
+Python Crypter 🥩
