@@ -7,7 +7,9 @@ python ./src/0BeeF.py
 ```
 
 **Before**:
-[Before](img/1.jpg)
+
+![Before](img/1.jpg)
 
 **After**:
-[After](img/2.jpg)
+
+![After](img/2.jpg)
