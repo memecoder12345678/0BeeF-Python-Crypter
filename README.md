@@ -8,10 +8,10 @@
 
 ## Result
 
-  **Before**:
+  - **Before**:
   
-  ![Before](img/1.jpg)
+    ![Before](img/1.jpg)
   
-  **After**:
+  - **After**:
   
-  ![After](img/2.jpg)
+    ![After](img/2.jpg)
