@@ -7,7 +7,6 @@
   ```
 
 ## Result
-
   - **Before**:
   
     ![Before](img/1.jpg)
@@ -15,3 +14,5 @@
   - **After**:
   
     ![After](img/2.jpg)
+
+  - **The AV detection rate was reduced by 60.3% 💀💀💀**
