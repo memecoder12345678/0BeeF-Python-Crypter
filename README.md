@@ -1,5 +1,5 @@
 # **0BeeF Python Crypter 🥩**
-**Python Crypter 🔥**
+**Python Crypter 🥩**
 
 ## Usage
   ```bash
