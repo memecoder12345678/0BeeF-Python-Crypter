@@ -104,7 +104,7 @@ if __name__ == "__main__":
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
 
-    obfuscated_code = obfuscate_code("if sys._getframe(1).f_trace is not None or sys.gettrace() is not None: sys.exit(1)\n" + code)
+    obfuscated_code = obfuscate_code("if hasattr(sys, '_getframe') and (sys._getframe(1).f_trace is not None or sys.gettrace() is not None): sys.exit(1)\n" + code)
     output_filename = "0BeeF_" + os.path.basename(file_path)
 
     with open(output_filename, "w", encoding="utf-8") as f:
