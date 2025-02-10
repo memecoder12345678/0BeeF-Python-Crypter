@@ -13,7 +13,7 @@
   
   - **After**:
   
-    ![After](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/1.jpg)
+    ![After](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/2.jpg)
 
   - **The AV detection rate was reduced by `60.3%` 💀💀💀**
 
