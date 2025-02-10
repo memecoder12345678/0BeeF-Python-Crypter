@@ -1,12 +1,12 @@
-# **0BeeF Python Crypter 🥩**
-**Python Crypter 🥩**
+# **0BeeF 🥩**
+**Python Crypter ⚙️**
 
-## Usage
+## **Usage**
   ```bash
   python ./src/0BeeF.py
   ```
 
-## Result
+## **Result**
   - **Before**:
   
     ![Before](img/1.jpg)
@@ -15,4 +15,8 @@
   
     ![After](img/2.jpg)
 
-  - **The AV detection rate was reduced by 60.3% 💀💀💀**
+  - **The AV detection rate was reduced by `60.3%` 💀💀💀**
+
+## **Tip**
+  - **If you want to convert the crypted code into an executable file, please do not use `Nuitka` ❌**
+  - **You can use `0BeeF` together with `PyArmor` to enhance security and prevent reverse engineering 🛡️**
