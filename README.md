@@ -19,4 +19,5 @@
 
 ## **Tip**
   - **If you want to convert the crypted code into an executable file, please do not use `Nuitka` ❌**
+  - **If your code is not detected by many AVs (less than 10), please do not use `0BeeF` ❌**
   - **You can use `0BeeF` together with `PyArmor` to enhance security and prevent reverse engineering 🛡️**
