@@ -25,6 +25,7 @@ def encode_b64(data):
 
 def extract_imports(code):
     imports = [
+        "import sys",
         "import base64",
         "import zlib",
         "import marshal",
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
 
-    obfuscated_code = obfuscate_code(code)
+    obfuscated_code = obfuscate_code("if sys._getframe(1).f_trace is not None: sys.exit(1)\n" + code)
     output_filename = "0BeeF_" + os.path.basename(file_path)
 
     with open(output_filename, "w", encoding="utf-8") as f:
