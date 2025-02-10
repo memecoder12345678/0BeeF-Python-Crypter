@@ -22,3 +22,5 @@
   - **If your code is already detected by fewer than 12 AVs, `0BeeF` is not necessary ❌**
   - **`0BeeF` can only reduce AV detections down to 8 at best ❌**
   - **You can use `0BeeF` together with `PyArmor` to enhance security and prevent reverse engineering 🛡️**
+## **License**  
+- **This project is licensed under the terms of the `Apache-2.0 license`**
