@@ -98,7 +98,7 @@ if __name__ == "__main__":
         print("\nExiting...")
         exit()
     if not os.path.exists(file_path):
-        print(f"{Fore.LIGHTRED_EX}[-]{Fore.RESET} File does not exist!")
+        print(f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] File does not exist!")
         exit()
 
     with open(file_path, "r", encoding="utf-8") as f:
@@ -111,5 +111,5 @@ if __name__ == "__main__":
         f.write(obfuscated_code)
 
     print(
-        f"{Fore.LIGHTGREEN_EX}[+]{Fore.RESET} Crypted file created: {output_filename}"
+        f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Crypted file created: {output_filename}"
     )
