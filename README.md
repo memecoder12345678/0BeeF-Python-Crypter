@@ -60,7 +60,7 @@ In a real-world test using a Python-based stealer detected by 24 antivirus engin
 
 ## Recommendations
 
-* Do **not** use `Nuitka` after encryption (runtime execution may fail)
+* Do **not** use `Nuitka` after encryption &mdash; it may optimize away the encryption logic (use the commercial version with flag `--enable-plugin=data-hiding` if needed)
 * If your script is detected by **fewer than 12 AV engines**, you likely don’t need 0BeeF
 * You **can combine 0BeeF with PyArmor** for better protection
 * Fully compatible with `PyInstaller`, `py2exe`, and similar tools **after** obfuscation
