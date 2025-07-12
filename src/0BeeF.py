@@ -23,24 +23,25 @@ def encode_b64(data):
     return base64.b64encode(data).decode()
 
 
-def extract_imports(code):
-    imports = [
-        "import sys",
-        "import base64",
-        "import zlib",
-        "import marshal",
-        "import ctypes",
-        "from cryptography.fernet import Fernet",
+def obfuscate_code(code):
+    payload_imports = []
+    stub_imports_list = [
+        "import sys", "import base64", "import zlib",
+        "import marshal", "import ctypes", "from cryptography.fernet import Fernet",
     ]
     for line in code.split("\n"):
-        if re.match(r"^(import|from) ", line.strip()):
-            if line.strip() not in imports:
-                imports.append(line.strip())
-    return "\n".join(imports)
+        stripped_line = line.strip()
+        if re.match(r"^(import|from) ", stripped_line) and stripped_line not in stub_imports_list:
+            payload_imports.append(stripped_line)
 
+    encoded_import_lines = []
+    for imp_line in payload_imports:
+        marshalled = marshal.dumps(imp_line.encode())
+        compressed = zlib.compress(marshalled)
+        encoded = base64.b64encode(compressed)
+        encoded_import_lines.append(encoded)
 
-def obfuscate_code(code):
-    extracted_imports = extract_imports(code)
+    final_import_calls = "\n".join([f"_x(b'{line.decode()}')" for line in encoded_import_lines])
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
     masked_key = xor_encrypt(encryption_key, mask_key)
@@ -58,25 +59,43 @@ def obfuscate_code(code):
  ╚██████╔╝██████╔╝███████╗███████╗██║
   ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩
 '''
-{extracted_imports}
 
-def xor_decrypt(data, key):
-    return bytes(a ^ b for a, b in zip(data, key * (len(data) // len(key) + 1)))
-
-mask_key = {list(mask_key)}
-masked_key = {list(masked_key)}
-decryption_key = xor_decrypt(bytes(masked_key), bytes(mask_key))
-encrypted_data = base64.b64decode({repr(final_data)})
-encrypted_data = marshal.loads(encrypted_data)
-encrypted_data = zlib.decompress(encrypted_data)
-encrypted_data = base64.b64decode(encrypted_data).decode()
-cipher = Fernet(decryption_key)
-decrypted_data = bytearray(cipher.decrypt(encrypted_data))
-mem_code = memoryview(decrypted_data)
-getattr(__import__("builtins"), "".join(map(chr, [101, 120, 101, 99])))(mem_code.tobytes())
-ctypes.memset(ctypes.addressof(ctypes.c_char.from_buffer(decrypted_data)), 0, len(decrypted_data))
-ctypes.memset(ctypes.addressof(ctypes.c_char.from_buffer(mem_code)), 0, len(mem_code))
-del decrypted_data, mem_code
+def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))))
+{final_import_calls}
+def _d(d, k):
+    _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
+    _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
+    return bytes(map(_x, d, _k_ext))
+_f = []
+_g = lambda m, f: getattr(__import__(''.join(map(chr, m))), ''.join(map(chr, f)))
+_b = ''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115])) # 'builtins'
+_f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 115]))))
+_f.append(_g([98, 97, 115, 101, 54, 52], [98, 54, 52, 100, 101, 99, 111, 100, 101]))
+_f.append(_g([109, 97, 114, 115, 104, 97, 108], [108, 111, 97, 100, 115]))
+_f.append(_g([122, 108, 105, 98], [100, 101, 99, 111, 109, 112, 114, 101, 115, 115]))
+_f.append(_g([99, 114, 121, 112, 116, 111, 103, 114, 97, 112, 104, 121, 46, 102, 101, 114, 110, 101, 116], [70, 101, 114, 110, 101, 116]))
+_f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121]))))
+_f.append(getattr(__import__(_b), ''.join(map(chr, [109, 101, 109, 111, 114, 121, 118, 105, 101, 119]))))
+_f.append(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
+_f.append(_d)
+_f.append(getattr(__import__('ctypes'), 'c_char'))
+_f.append(getattr(__import__('ctypes'), 'addressof'))
+_f.append(getattr(__import__('ctypes'), 'memset'))
+_d_final = {repr(final_data)}
+_k_mask = {list(mask_key)}
+_k_masked = {list(masked_key)}
+_v_key = _f[8](_f[0](_k_masked), _f[0](_k_mask))
+_v_cipher = _f[4](_v_key)
+_p1 = _f[1](_d_final)
+_p2 = _f[2](_p1)
+_p3 = _f[3](_p2)
+_p4 = _f[1](_p3)
+_v_decrypted = _f[5](_v_cipher.decrypt(_p4))
+_v_mem = _f[6](_v_decrypted)
+_f[7](_v_mem.tobytes())
+_f[11](_f[10](_f[9].from_buffer(_v_decrypted)), 0, len(_v_decrypted))
+_f[11](_f[10](_f[9].from_buffer(_v_mem)), 0, len(_v_mem))
+del _d_final, _k_mask, _k_masked, _v_key, _v_cipher, _p1, _p2, _p3, _p4, _v_decrypted, _v_mem, _f, _g, _b
 """
     return stub_code
 
