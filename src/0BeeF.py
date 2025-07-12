@@ -165,6 +165,7 @@ def obfuscate_code(code):
 '''
 
 def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), globals())
+
 _x(b'eJwr5mJgYMjMLcgvKlEoriwGAB3+BJg=')
 _x(b'eJwr5mVgYMjMLcgvKlFISixONTMBACzqBUE=')
 _x(b'eJwr5mZgYMjMLcgvKlGoyslMAgAi6ATr')
@@ -173,10 +174,12 @@ _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
 _x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
 {final_import_calls}
+
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
     return bytes(map(_x, d, _k_ext))
+
 _f = []
 _g = lambda m, f: getattr(__import__(''.join(map(chr, m))), ''.join(map(chr, f)))
 _b = ''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))
@@ -189,11 +192,10 @@ _f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 
 _f.append(getattr(__import__(_b), ''.join(map(chr, [109, 101, 109, 111, 114, 121, 118, 105, 101, 119]))))
 _f.append(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
 _f.append(_d)
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114])))
-_f.append(
-getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102])))
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116])))
-_d_f = {repr(final_data)}
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114]))))
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))_d_f = {repr(final_data)}
+
 _k_m = {list(mask_key)}
 _k_md = {list(masked_key)}
 _v_k = _f[8](_f[0](_k_md), _f[0](_k_m))
@@ -205,13 +207,16 @@ _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
 _f[7](_f[2](_v_m.tobytes()))
+
 try:
     for pattern in [0x00, 0xFF, random.randint(0, 255)]:
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
 except:
     pass
-del _d_f, _k_, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b
+    
+del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b
+
 """
     return stub_code
 
