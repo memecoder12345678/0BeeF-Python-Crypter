@@ -43,11 +43,11 @@ Follow the prompt to select a `.py` file. The encrypted file will be saved with 
 
 ### Before encryption:
 
-[View image](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/1.jpg)
+![1.jpg](https://raw.githubusercontent.com/memecoder12345678/0BeeF-Python-Crypter/refs/heads/main/img/1.jpg)
 
 ### After encryption:
 
-[View image](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/2.jpg)
+![2.jpg](https://raw.githubusercontent.com/memecoder12345678/0BeeF-Python-Crypter/refs/heads/main/img/2.jpg)
 
 ---
 
