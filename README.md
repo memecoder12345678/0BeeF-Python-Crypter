@@ -103,8 +103,3 @@ Using this software for malicious purposes may violate local, state, or internat
 
 **MemeCoder**
 GitHub: [github.com/memecoder12345678](https://github.com/memecoder12345678)
-
----
-
-If you'd like this in `README.md` format directly or want to version it (v1.1, v1.2…), I can help build that as well.
-Need a changelog or roadmap next?
