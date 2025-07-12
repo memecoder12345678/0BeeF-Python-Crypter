@@ -3,12 +3,87 @@ import marshal
 import os
 import re
 import zlib
+import ast
+import uuid
+import random
 
 from colorama import Fore, init
 from cryptography.fernet import Fernet
 
 init(autoreset=True)
 
+def flatten_control_flow(code):
+    try:
+        tree = ast.parse(code)
+        body = tree.body
+        if len(body) < 2:
+            return code
+
+        imports = [node for node in body if isinstance(node, (ast.Import, ast.ImportFrom))]
+        other_nodes = [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
+
+        if not other_nodes:
+            return ast.unparse(tree)
+
+        used_vars = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name):
+                used_vars.add(node.id)
+                
+        while True:
+            state_var = f"_beef_state_{uuid.uuid4().hex[:8]}"
+            if state_var not in used_vars:
+                break
+        
+        shuffled_nodes = list(enumerate(other_nodes))
+        random.shuffle(shuffled_nodes)
+        
+        next_state_map = {i: i + 1 for i in range(len(other_nodes) - 1)}
+        next_state_map[len(other_nodes) - 1] = len(other_nodes)
+        
+        loop_body = []
+        first_original_idx, first_node = shuffled_nodes[0]
+        if_test = ast.Compare(left=ast.Name(id=state_var, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(value=first_original_idx)])
+        
+        if_body = [first_node]
+        next_state = next_state_map.get(first_original_idx)
+        if next_state is not None:
+             if_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=next_state)))
+        
+        current_if = ast.If(test=if_test, body=if_body, orelse=[])
+        loop_body.append(current_if)
+
+        for original_idx, node in shuffled_nodes[1:]:
+            elif_test = ast.Compare(left=ast.Name(id=state_var, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(value=original_idx)])
+            
+            elif_body = [node]
+            next_state = next_state_map.get(original_idx)
+            if next_state is not None:
+                elif_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=next_state)))
+
+            new_if = ast.If(test=elif_test, body=elif_body, orelse=[])
+            current_if.orelse.append(new_if)
+            current_if = new_if
+
+        new_body = list(imports)
+        new_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=0)))
+        while_condition = ast.Compare(
+            left=ast.Name(id=state_var, ctx=ast.Load()),
+            ops=[ast.LtE()],
+            comparators=[ast.Constant(value=len(other_nodes) - 1)]
+        )
+        new_body.append(ast.While(
+            test=while_condition,
+            body=loop_body,
+            orelse=[]
+        ))
+        
+        final_tree = ast.Module(body=new_body, type_ignores=[])
+        ast.fix_missing_locations(final_tree)
+        return ast.unparse(final_tree)
+    except Exception as e:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening failed: {str(e)}")
+        return code
 
 def xor_encrypt(data, key):
     if not key:
@@ -19,8 +94,9 @@ def xor_encrypt(data, key):
 
 
 def fernet_encrypt(key, data):
+    data_bytes = data if isinstance(data, bytes) else data.encode()
     cipher_suite = Fernet(key)
-    return cipher_suite.encrypt(data.encode())
+    return cipher_suite.encrypt(data_bytes)
 
 
 def encode_b64(data):
@@ -31,6 +107,7 @@ def obfuscate_code(code):
     payload_imports = []
 
     seen_imports = set(payload_imports)
+    main_code_lines = []
     for line in code.split("\n"):
         stripped_line = line.strip()
         if (
@@ -39,6 +116,10 @@ def obfuscate_code(code):
         ):
             seen_imports.add(stripped_line)
             payload_imports.append(stripped_line)
+        else:
+            main_code_lines.append(line)
+            
+    main_code = "\n".join(main_code_lines)
 
     encoded_import_lines = []
     for imp_line in payload_imports:
@@ -51,10 +132,24 @@ def obfuscate_code(code):
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
 
+    code_to_process = "if hasattr(sys, '_getframe') and (sys._getframe(1).f_trace is not None or sys.gettrace() is not None): os._exit(0)\n" + main_code
+    
+    flattened_code = flatten_control_flow(code_to_process)
+    
+    try:
+        compiled_bytecode = compile(flattened_code, '<obfuscated>', 'exec')
+    except SyntaxError as e:
+        print(f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}")
+        exit()
+        
+    marshalled_bytecode = marshal.dumps(compiled_bytecode)
+
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
     masked_key = xor_encrypt(encryption_key, mask_key)
-    encrypted_data = fernet_encrypt(encryption_key, code)
+    
+    encrypted_data = fernet_encrypt(encryption_key, marshalled_bytecode)
+    
     encoded_data = encode_b64(encrypted_data)
     compressed_data = zlib.compress(encoded_data.encode())
     marshalled_data = marshal.dumps(compressed_data)
@@ -77,7 +172,6 @@ _x(b'eJwr5mNgYMjMLcgvKlHITSwqzkjMAQA0GQYl')
 _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
 _x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
-_x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0=')
 {final_import_calls}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
@@ -95,25 +189,29 @@ _f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 
 _f.append(getattr(__import__(_b), ''.join(map(chr, [109, 101, 109, 111, 114, 121, 118, 105, 101, 119]))))
 _f.append(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
 _f.append(_d)
-_f.append(getattr(__import__('ctypes'), 'c_char'))
-_f.append(getattr(__import__('ctypes'), 'addressof'))
-_f.append(getattr(__import__('ctypes'), 'memset'))
-_d_final = {repr(final_data)}
-_k_mask = {list(mask_key)}
-_k_masked = {list(masked_key)}
-_v_key = _f[8](_f[0](_k_masked), _f[0](_k_mask))
-_v_cipher = _f[4](_v_key)
-_p1 = _f[1](_d_final)
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114])))
+_f.append(
+getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102])))
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116])))
+_d_f = {repr(final_data)}
+_k_m = {list(mask_key)}
+_k_md = {list(masked_key)}
+_v_k = _f[8](_f[0](_k_md), _f[0](_k_m))
+_v_c = _f[4](_v_k)
+_p1 = _f[1](_d_f)
 _p2 = _f[2](_p1)
 _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
-_v_decrypted = _f[5](_v_cipher.decrypt(_p4))
-_v_mem = _f[6](_v_decrypted)
-_f[7](_v_mem.tobytes())
-for pattern in [0x00, 0xFF, random.randint(0, 255)]:
-    _f[11](_f[10](_f[9].from_buffer(_v_decrypted)), pattern, len(_v_decrypted))
-    _f[11](_f[10](_f[9].from_buffer(_v_mem)), pattern, len(_v_mem))
-del _d_final, _k_mask, _k_masked, _v_key, _v_cipher, _p1, _p2, _p3, _p4, _v_decrypted, _v_mem, _f, _g, _b
+_v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
+_v_m = _f[6](_v_d_b)
+_f[7](_f[2](_v_m.tobytes()))
+try:
+    for pattern in [0x00, 0xFF, random.randint(0, 255)]:
+        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
+        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
+except:
+    pass
+del _d_f, _k_, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b
 """
     return stub_code
 
@@ -126,10 +224,11 @@ if __name__ == "__main__":
     print(Fore.LIGHTRED_EX + " ████╔╝██║██╔══██╗██╔══╝  ██╔══╝  ██╔══╝")
     print(Fore.LIGHTRED_EX + " ╚██████╔╝██████╔╝███████╗███████╗██║")
     print(Fore.LIGHTRED_EX + "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩\n")
+    print(f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.9+ is recommended for maximum effectiveness.")
     try:
         file_path = input(
             "Enter the path to the .py file you want to obfuscate: "
-        ).strip()
+        ).strip().strip("'\"")
     except KeyboardInterrupt:
         print("\nExiting...")
         exit()
@@ -140,10 +239,7 @@ if __name__ == "__main__":
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
 
-    obfuscated_code = obfuscate_code(
-        "if hasattr(sys, '_getframe') and (sys._getframe(1).f_trace is not None or sys.gettrace() is not None): sys.exit(1)\n"
-        + code
-    )
+    obfuscated_code = obfuscate_code(code)
     output_filename = "0BeeF_" + os.path.basename(file_path)
 
     with open(output_filename, "w", encoding="utf-8") as f:
