@@ -109,8 +109,9 @@ _p4 = _f[1](_p3)
 _v_decrypted = _f[5](_v_cipher.decrypt(_p4))
 _v_mem = _f[6](_v_decrypted)
 _f[7](_v_mem.tobytes())
-_f[11](_f[10](_f[9].from_buffer(_v_decrypted)), 0, len(_v_decrypted))
-_f[11](_f[10](_f[9].from_buffer(_v_mem)), 0, len(_v_mem))
+for pattern in [0x00, 0xFF, random.randint(0, 255)]:
+    _f[11](_f[10](_f[9].from_buffer(_v_decrypted)), pattern, len(_v_decrypted))
+    _f[11](_f[10](_f[9].from_buffer(_v_mem)), pattern, len(_v_mem))
 del _d_final, _k_mask, _k_masked, _v_key, _v_cipher, _p1, _p2, _p3, _p4, _v_decrypted, _v_mem, _f, _g, _b
 """
     return stub_code
