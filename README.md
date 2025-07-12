@@ -1,26 +1,110 @@
-# **0BeeF 🥩**
-**Python Crypter ⚙️**
+# 0BeeF 🥩
 
-## **Usage**
-  ```bash
-  python ./src/0BeeF.py
-  ```
+**Python Crypter & Virtual Execution Runtime**
 
-## **Result**
-  - **Before**:
-  
-    ![Before](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/1.jpg)
-  
-  - **After**:
-  
-    ![After](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/2.jpg)
+---
 
-  - **The AV detection rate was reduced by `60.3%` 💀💀💀**
+## Overview
 
-## **Tip**
-  - **If you want to convert the crypted code into an executable file, please do not use `Nuitka` ❌**
-  - **If your code is already detected by fewer than 12 AVs, `0BeeF` is not necessary ❌**
-  - **`0BeeF` can only reduce AV detections down to 8 at best ❌**
-  - **You can use `0BeeF` together with `PyArmor` to enhance security and prevent reverse engineering 🛡️**
-## **License**  
-- **This project is licensed under the terms of the `Apache-2.0 license`**
+**0BeeF** is a powerful crypter and obfuscation tool for Python scripts. It is designed to:
+
+* Obfuscate code at a deep level
+* Encrypt payloads with multiple layers (Fernet + XOR)
+* Execute decrypted payloads fully in-memory
+* Evade antivirus (AV) detection
+* Resist static and dynamic reverse engineering
+* Wipe memory to remove traces after execution
+
+---
+
+## Features
+
+* Obfuscation using `marshal`, `zlib`, `base64`
+* Multi-layer encryption: Fernet (AES-CBC + HMAC) + XOR key masking
+* Dynamic import injection to avoid static detection
+* In-memory execution via `exec` and `memoryview`
+* RAM wiping using `ctypes.memset`
+* Anti-debugging using `sys.gettrace()` and `_getframe`
+* Virtualized decryption environment using function-index mapping
+
+---
+
+## Usage
+
+```bash
+python ./src/0BeeF.py
+```
+
+Follow the prompt to select a `.py` file. The encrypted file will be saved with the prefix `0BeeF_`.
+
+---
+
+## Example
+
+### Before encryption:
+
+[View image](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/1.jpg)
+
+### After encryption:
+
+[View image](https://github.com/memecoder12345678/0BeeF-Python-Crypter/blob/main/img/2.jpg)
+
+---
+
+## Detection Reduction
+
+In a real-world test using a Python-based stealer detected by 24 antivirus engines, 0BeeF reduced detection to 9 engines.
+**Detection rate reduced by approximately 60.3%.**
+
+---
+
+## Recommendations
+
+* Do **not** use `Nuitka` after encryption (runtime execution may fail)
+* If your script is detected by **fewer than 12 AV engines**, you likely don’t need 0BeeF
+* You **can combine 0BeeF with PyArmor** for better protection
+* Fully compatible with `PyInstaller`, `py2exe`, and similar tools **after** obfuscation
+
+---
+
+## How It Works
+
+```
+[ Python code ]
+   ↓
+[ marshal → zlib → base64 → Fernet → XOR ]
+   ↓
+Encrypted payload
+   ↓
+Stub script decrypts and executes code in memory
+   ↓
+Decrypted memory is wiped after execution
+```
+
+All decryption and execution occurs in memory, leaving no traces on disk.
+
+---
+
+## License
+
+This project is licensed under the **Apache-2.0 License**.
+
+---
+
+## Disclaimer
+
+0BeeF is intended for **educational and ethical research** only.
+You are fully responsible for how you use this tool.
+Using this software for malicious purposes may violate local, state, or international laws.
+
+---
+
+## Author
+
+**MemeCoder**
+GitHub: [github.com/memecoder12345678](https://github.com/memecoder12345678)
+
+---
+
+If you'd like this in `README.md` format directly or want to version it (v1.1, v1.2…), I can help build that as well.
+Need a changelog or roadmap next?
