@@ -59,7 +59,7 @@ Follow the prompt to select a `.py` file. The encrypted file will be saved with 
 ## Detection Reduction
 
 In a real-world test using a Python-based stealer detected by 24 antivirus engines, 0BeeF reduced detection to 9 engines.
-**Detection rate reduced by approximately 60.3%.**
+**Detection rate reduced by approximately 62.5%.**
 
 ### Before encryption:
 
