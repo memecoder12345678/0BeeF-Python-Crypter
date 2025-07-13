@@ -13,6 +13,7 @@ from cryptography.fernet import Fernet
 
 init(autoreset=True)
 
+
 def flatten_control_flow(code):
     try:
         tree = ast.parse(code)
@@ -20,8 +21,12 @@ def flatten_control_flow(code):
         if len(body) < 2:
             return code
 
-        imports = [node for node in body if isinstance(node, (ast.Import, ast.ImportFrom))]
-        other_nodes = [node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))]
+        imports = [
+            node for node in body if isinstance(node, (ast.Import, ast.ImportFrom))
+        ]
+        other_nodes = [
+            node for node in body if not isinstance(node, (ast.Import, ast.ImportFrom))
+        ]
 
         if not other_nodes:
             return ast.unparse(tree)
@@ -30,61 +35,81 @@ def flatten_control_flow(code):
         for node in ast.walk(tree):
             if isinstance(node, ast.Name):
                 used_vars.add(node.id)
-                
+
         while True:
             state_var = f"_beef_state_{uuid.uuid4().hex[:8]}"
             if state_var not in used_vars:
                 break
-        
+
         shuffled_nodes = list(enumerate(other_nodes))
         random.shuffle(shuffled_nodes)
-        
+
         next_state_map = {i: i + 1 for i in range(len(other_nodes) - 1)}
         next_state_map[len(other_nodes) - 1] = len(other_nodes)
-        
+
         loop_body = []
         first_original_idx, first_node = shuffled_nodes[0]
-        if_test = ast.Compare(left=ast.Name(id=state_var, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(value=first_original_idx)])
-        
+        if_test = ast.Compare(
+            left=ast.Name(id=state_var, ctx=ast.Load()),
+            ops=[ast.Eq()],
+            comparators=[ast.Constant(value=first_original_idx)],
+        )
+
         if_body = [first_node]
         next_state = next_state_map.get(first_original_idx)
         if next_state is not None:
-             if_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=next_state)))
-        
+            if_body.append(
+                ast.Assign(
+                    targets=[ast.Name(id=state_var, ctx=ast.Store())],
+                    value=ast.Constant(value=next_state),
+                )
+            )
+
         current_if = ast.If(test=if_test, body=if_body, orelse=[])
         loop_body.append(current_if)
 
         for original_idx, node in shuffled_nodes[1:]:
-            elif_test = ast.Compare(left=ast.Name(id=state_var, ctx=ast.Load()), ops=[ast.Eq()], comparators=[ast.Constant(value=original_idx)])
-            
+            elif_test = ast.Compare(
+                left=ast.Name(id=state_var, ctx=ast.Load()),
+                ops=[ast.Eq()],
+                comparators=[ast.Constant(value=original_idx)],
+            )
+
             elif_body = [node]
             next_state = next_state_map.get(original_idx)
             if next_state is not None:
-                elif_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=next_state)))
+                elif_body.append(
+                    ast.Assign(
+                        targets=[ast.Name(id=state_var, ctx=ast.Store())],
+                        value=ast.Constant(value=next_state),
+                    )
+                )
 
             new_if = ast.If(test=elif_test, body=elif_body, orelse=[])
             current_if.orelse.append(new_if)
             current_if = new_if
 
         new_body = list(imports)
-        new_body.append(ast.Assign(targets=[ast.Name(id=state_var, ctx=ast.Store())], value=ast.Constant(value=0)))
+        new_body.append(
+            ast.Assign(
+                targets=[ast.Name(id=state_var, ctx=ast.Store())],
+                value=ast.Constant(value=0),
+            )
+        )
         while_condition = ast.Compare(
             left=ast.Name(id=state_var, ctx=ast.Load()),
             ops=[ast.LtE()],
-            comparators=[ast.Constant(value=len(other_nodes) - 1)]
+            comparators=[ast.Constant(value=len(other_nodes) - 1)],
         )
-        new_body.append(ast.While(
-            test=while_condition,
-            body=loop_body,
-            orelse=[]
-        ))
-        
+        new_body.append(ast.While(test=while_condition, body=loop_body, orelse=[]))
+
         final_tree = ast.Module(body=new_body, type_ignores=[])
         ast.fix_missing_locations(final_tree)
         return ast.unparse(final_tree)
     except Exception as e:
         print(f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening failed: {str(e)}")
         return code
+
 
 def xor_encrypt(data, key):
     if not key:
@@ -119,7 +144,7 @@ def obfuscate_code(code):
             payload_imports.append(stripped_line)
         else:
             main_code_lines.append(line)
-            
+
     main_code = "\n".join(main_code_lines)
 
     encoded_import_lines = []
@@ -177,10 +202,19 @@ if is_debugger_present():
     os._exit(1)
 
 """
-    code_to_process = anti_debug_code + main_code
+    try:
+        debug = input("Enable anti-debugging? (y/n): ").strip().lower()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(1)
+
+    if debug in ["y", "yes"]:
+        code_to_process = anti_debug_code + main_code
+    else:
+        code_to_process = main_code
 
     try:
-        flatten = input("flatten control flow? (y/n): ").strip().lower
+        flatten = input("Enable control flow flattening? (y/n): ").strip().lower()
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(1)
@@ -189,21 +223,23 @@ if is_debugger_present():
         flattened_code = flatten_control_flow(code_to_process)
     else:
         flattened_code = code_to_process
-    
+
     try:
-        compiled_bytecode = compile(flattened_code, '<obfuscated>', 'exec')
+        compiled_bytecode = compile(flattened_code, "<obfuscated>", "exec")
     except SyntaxError as e:
-        print(f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}")
+        print(
+            f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}"
+        )
         sys.exit(2)
-        
+
     marshalled_bytecode = marshal.dumps(compiled_bytecode)
 
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
     masked_key = xor_encrypt(encryption_key, mask_key)
-    
+
     encrypted_data = fernet_encrypt(encryption_key, marshalled_bytecode)
-    
+
     encoded_data = encode_b64(encrypted_data)
     compressed_data = zlib.compress(encoded_data.encode())
     marshalled_data = marshal.dumps(compressed_data)
@@ -286,11 +322,15 @@ if __name__ == "__main__":
     print(Fore.LIGHTRED_EX + " ████╔╝██║██╔══██╗██╔══╝  ██╔══╝  ██╔══╝")
     print(Fore.LIGHTRED_EX + " ╚██████╔╝██████╔╝███████╗███████╗██║")
     print(Fore.LIGHTRED_EX + "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩\n")
-    print(f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.9+ is recommended for maximum effectiveness.")
+    print(
+        f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.9+ is recommended for maximum effectiveness."
+    )
     try:
-        file_path = input(
-            "Enter the path to the .py file you want to obfuscate: "
-        ).strip().strip("'\"")
+        file_path = (
+            input("Enter the path to the .py file you want to obfuscate: ")
+            .strip()
+            .strip("'\"")
+        )
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
