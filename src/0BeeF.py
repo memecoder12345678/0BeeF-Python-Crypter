@@ -206,24 +206,132 @@ if is_debugger_present():
         debug = input("Enable anti-debugging? (y/n): ").strip().lower()
     except KeyboardInterrupt:
         print("\nExiting...")
-        sys.exit(1)
+        sys.exit(0)
 
     if debug in ["y", "yes"]:
         code_to_process = anti_debug_code + main_code
     else:
         code_to_process = main_code
 
+    anti_vm_code = """def is_vm():
+    try:
+        output = subprocess.check_output(
+            ["wmic", "computersystem", "get", "model"],
+            encoding="utf-8",
+            timeout=3,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+        if any(
+            vm in output
+            for vm in [
+                "Virtual",
+                "VMware",
+                "VirtualBox",
+                "Hyper-V",
+                "QEMU",
+                "KVM",
+                "Parallels",
+            ]
+        ):
+            return True
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        pass
+    try:
+        output = subprocess.check_output(
+            ["getmac"],
+            encoding="utf-8",
+            timeout=3,
+            creationflags=subprocess.CREATE_NO_WINDOW,
+        )
+        if bool(
+            re.search(
+                r"(00:05:69|00:0C:29|00:50:56|00:1C:14|00:03:FF|00:05:00)", output
+            )
+        ):
+            return True
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        pass
+    paths = [
+        "C:\\\\Program Files\\\\VMware\\\\VMware Tools",
+        "C:\\\\Program Files\\\\Oracle\\\\VirtualBox Guest Additions",
+        "C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxGuest.sys",
+        "C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxMouse.sys",
+        "C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxSF.sys",
+        "C:\\\\Program Files\\\\WindowsApps\\\\Microsoft.WindowsSandbox_",
+    ]
+    if any(os.path.exists(path) for path in paths):
+        return True
+    try:
+        if bool(ctypes.windll.kernel32.IsProcessorFeaturePresent(29)):
+            return True
+    except (AttributeError, OSError):
+        pass
+    try:
+        if bool(ctypes.windll.kernel32.IsDebuggerPresent()):
+            return True
+    except (AttributeError, OSError):
+        pass
+    sus_procs = {
+        "vmtoolsd",
+        "vboxservice",
+        "wireshark",
+        "fiddler",
+        "sandboxie",
+        "processhacker",
+    }
+    with ThreadPoolExecutor() as executor:
+        futures = {
+            executor.submit(lambda proc: proc.info.get("name", "").lower(), proc): proc
+            for proc in psutil.process_iter(["name"])
+        }
+        if any(future.result() in sus_procs for future in futures):
+            return True
+    start_time = time.perf_counter()
+    for _ in range(1_000_000):
+        pass
+    if time.perf_counter() - start_time > 0.5:
+        return True
+
+    return False
+
+if is_vm():
+    os._exit(1)
+
+"""
+    try:
+        anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
+    if anti_vm in ["y", "yes"]:
+        code_to_process = anti_vm_code + code_to_process
+    else:
+        code_to_process = code_to_process
+    
+
     try:
         flatten = input("Enable control flow flattening? (y/n): ").strip().lower()
     except KeyboardInterrupt:
         print("\nExiting...")
-        sys.exit(1)
+        sys.exit(0)
 
     if flatten in ["y", "yes"]:
         flattened_code = flatten_control_flow(code_to_process)
     else:
         flattened_code = code_to_process
+    try:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] Self-destruct functionality only works with plain Python scripts (.py) or executables packaged with PyInstaller.")
+        self_destruct = input("Enable self-destructing? (y/n): ").strip().lower()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
 
+    if self_destruct in ["y", "yes"]:
+        is_self_destruct = True
+    else:
+        is_self_destruct = False
+
+    print(flattened_code)
     try:
         compiled_bytecode = compile(flattened_code, "<obfuscated>", "exec")
     except SyntaxError as e:
@@ -253,7 +361,8 @@ if is_debugger_present():
  ╚██████╔╝██████╔╝███████╗███████╗██║
   ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩
 '''
-def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), globals())
+file = globals()["__file__"]
+def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), globals(), {{"__file__": file}})
 _x(b'eJwr5mJgYMjMLcgvKlEoriwGAB3+BJg=')
 _x(b'eJwr5mVgYMjMLcgvKlFISixONTMBACzqBUE=')
 _x(b'eJwr5mZgYMjMLcgvKlGoyslMAgAi6ATr')
@@ -261,9 +370,16 @@ _x(b'eJwr5mNgYMjMLcgvKlHITSwqzkjMAQA0GQYl')
 _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
 _x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
-_x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0=')
-_x(b'eJwr5mNgYMjMLcgvKlGoSi3Kz6xKBQA0qgZF'){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
+_x(b'eJwr5mVgYMjMLcgvKlFILEmtyCwBAC3qBcs=')
+_x(b'eJwr5mRgYMjMLcgvKlEoSgUAGUMEDw==')
+_x(b'eJwrFmRgYMjMLcgvKlEoLk0qKMpPTi0uBgBKCAeJ')
+_x(b'eJwr5mZgYMjMLcgvKlEoycxNBQAi0gTp')
+_x(b'eJwrNmRgYEgrys9VSM7PSy4tKkrNK9FLKy0pLUotVsjMLcgvKlEIyShKTUwJyM/Pca1ITS4tyS8CAAZAFBQ=')
+_x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
+_x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
+_x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
+_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA=='){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
@@ -298,13 +414,13 @@ _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
-_f[15](_v_d_b)
-_f[15](_v_m)
 _f[7](_f[2](_v_m.tobytes()))
-_f[14](_v_d_b)
-_f[14](_v_m)
-_f[16](_v_d_b)
-_f[16](_v_m)
+try:
+    for pattern in [0x00, 0xFF, _f[12](0, 255)]:
+        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
+        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
+except:
+    pass{"\n_x(b'eJyVU7Fu3DAMzdBJXyGgw9mHg9GiW4COLZAhQIbsgmrTthrZMii6yfVvOnTv3K5F/yN/UkpnX+Q73xAOtkA+8T2Sov/75uqqgloqD7ZWFXjCsaQsvxaSzdSyAdJEmPm938lNje479Jud/KythwkVrBwRoSdVGwvyo2R0AU9QjqS/WIgo4AsX8SoelBIREAVVYIEg+rPwGTS1CWHtUCppeom6byD7kISCEe6Xjqkc54uQiMUZT34tcWqMRujct0TBKg6BRuzlPY6wiMNTCQOtCOkGhyTJdHAWC87CW4Ahe1e8f+GbOGLjD21atChtaC5eOb1ZD3RDuH/0B4eqDPKE5ljBKcOZvVm+mAaz4z5MhLtmubsBMSc46S8ri+jCk0byj4babKNuP91s8msp38r79t8v2T3/+VlKev79o5N3+5uesdYCnjdsbdRJVb4dydhVxCFUYEcIkM1v46sz/VH57qA0Px/8peEGG7T3QsR33Dr3oPi5HZfqdNWEUA5NY3ptI+64PoaSiPNzkGXG45SfJZctVAeKrcaGJ73dPjyG08yYaDg4FoRnt04yT9SvT37pohBzgWH10wLEXFwamNIIoSn8eSUbfl6A2Qt1/h/AkGor')" if is_self_destruct else ""}
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
     return stub_code
 
