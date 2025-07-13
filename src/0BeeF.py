@@ -253,9 +253,7 @@ if is_debugger_present():
  ╚██████╔╝██████╔╝███████╗███████╗██║
   ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩
 '''
-
 def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), globals())
-
 _x(b'eJwr5mJgYMjMLcgvKlEoriwGAB3+BJg=')
 _x(b'eJwr5mVgYMjMLcgvKlFISixONTMBACzqBUE=')
 _x(b'eJwr5mZgYMjMLcgvKlGoyslMAgAi6ATr')
@@ -264,13 +262,12 @@ _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
 _x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
-_x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0='){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
-
+_x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0=')
+_x(b'eJwr5mNgYMjMLcgvKlGoSi3Kz6xKBQA0qgZF'){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
     return bytes(map(_x, d, _k_ext))
-
 _f = []
 _g = lambda m, f: getattr(__import__(''.join(map(chr, m))), ''.join(map(chr, f)))
 _b = ''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))
@@ -287,7 +284,9 @@ _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), 
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))
 _f.append(getattr(__import__(''.join(map(chr, [114, 97, 110, 100, 111, 109]))), ''.join(map(chr, [114, 97, 110, 100, 105, 110, 116]))))
-
+_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [122, 101, 114, 111, 105, 122, 101, 49]))))
+_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [109, 108, 111, 99, 107]))))
+_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [109, 117, 110, 108, 111, 99, 107]))))
 _d_f = {repr(final_data)}
 _k_m = {list(mask_key)}
 _k_md = {list(masked_key)}
@@ -299,19 +298,14 @@ _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
+_f[15](_v_d_b)
+_f[15](_v_m)
 _f[7](_f[2](_v_m.tobytes()))
-
-try:
-    for pattern in [0x00, 0xFF, _f[12](0, 255)]:
-        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
-        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
-except:
-    pass
-    
-del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b
-import gc; gc.collect()
-
-"""
+_f[14](_v_d_b)
+_f[14](_v_m)
+_f[16](_v_d_b)
+_f[16](_v_m)
+del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
     return stub_code
 
 
