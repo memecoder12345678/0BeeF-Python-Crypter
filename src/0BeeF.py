@@ -309,6 +309,7 @@ except:
     pass
     
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b
+import gc; gc.collect()
 
 """
     return stub_code
