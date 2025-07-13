@@ -4,6 +4,7 @@ import os
 import re
 import zlib
 import ast
+import sys
 import uuid
 import random
 
@@ -132,15 +133,68 @@ def obfuscate_code(code):
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
 
-    code_to_process = "if hasattr(sys, '_getframe') and (sys._getframe(1).f_trace is not None or sys.gettrace() is not None): os._exit(0)\n" + main_code
-    
-    flattened_code = flatten_control_flow(code_to_process)
+    anti_debug_code = """def is_debugger_present():
+    debugging_modules = {
+        'pdb',
+        'debugpy',
+        'pydevd',
+        'ipdb',
+        'bdb'
+    }
+    if debugging_modules.intersection(sys.modules):
+        return True
+
+    if hasattr(sys, 'gettrace') and sys.gettrace() is not None:
+        return True
+
+    try:
+        if hasattr(sys, '_getframe') and sys._getframe(1).f_trace is not None:
+            return True
+    except (AttributeError, ValueError):
+        pass
+        
+    if os.name == 'nt':
+        try:
+            if ctypes.windll.kernel32.IsDebuggerPresent():
+                return True
+        except (ImportError, AttributeError):
+            pass
+            
+    if os.name == 'posix':
+        try:
+            with open('/proc/self/status') as f:
+                for line in f:
+                    if line.startswith('TracerPid:'):
+                        if int(line.split()[1]) != 0:
+                            return True
+                        break
+        except (IOError, ValueError):
+            pass
+
+    return False
+
+if is_debugger_present():
+    os._exit(1)
+
+"""
+    code_to_process = anti_debug_code + main_code
+
+    try:
+        flatten = input("flatten control flow? (y/n): ").strip().lower
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(1)
+
+    if flatten in ["y", "yes"]:
+        flattened_code = flatten_control_flow(code_to_process)
+    else:
+        flattened_code = code_to_process
     
     try:
         compiled_bytecode = compile(flattened_code, '<obfuscated>', 'exec')
     except SyntaxError as e:
         print(f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}")
-        exit()
+        sys.exit(2)
         
     marshalled_bytecode = marshal.dumps(compiled_bytecode)
 
@@ -173,7 +227,8 @@ _x(b'eJwr5mNgYMjMLcgvKlHITSwqzkjMAQA0GQYl')
 _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
 _x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
-{final_import_calls}
+_x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
+_x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0='){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
 
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
@@ -194,8 +249,10 @@ _f.append(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
 _f.append(_d)
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114]))))
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))_d_f = {repr(final_data)}
+_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))
+_f.append(getattr(__import__(''.join(map(chr, [114, 97, 110, 100, 111, 109]))), ''.join(map(chr, [114, 97, 110, 100, 105, 110, 116]))))
 
+_d_f = {repr(final_data)}
 _k_m = {list(mask_key)}
 _k_md = {list(masked_key)}
 _v_k = _f[8](_f[0](_k_md), _f[0](_k_m))
@@ -209,7 +266,7 @@ _v_m = _f[6](_v_d_b)
 _f[7](_f[2](_v_m.tobytes()))
 
 try:
-    for pattern in [0x00, 0xFF, random.randint(0, 255)]:
+    for pattern in [0x00, 0xFF, _f[12](0, 255)]:
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
 except:
@@ -236,10 +293,10 @@ if __name__ == "__main__":
         ).strip().strip("'\"")
     except KeyboardInterrupt:
         print("\nExiting...")
-        exit()
+        sys.exit(0)
     if not os.path.exists(file_path):
         print(f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] File does not exist!")
-        exit()
+        sys.exit(1)
 
     with open(file_path, "r", encoding="utf-8") as f:
         code = f.read()
