@@ -29,6 +29,23 @@
 
 ---
 
+
+### Installation
+
+First, clone the 0BeeF repository to your local machine:
+
+```bash
+git clone https://github.com/memecoder12345678/0BeeF-Python-Crypter.git
+cd 0BeeF
+```
+
+Install all required libraries via:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
 ## Usage
 
 ```bash
@@ -39,7 +56,10 @@ Follow the prompt to select a `.py` file. The encrypted file will be saved with 
 
 ---
 
-## Example
+## Detection Reduction
+
+In a real-world test using a Python-based stealer detected by 24 antivirus engines, 0BeeF reduced detection to 9 engines.
+**Detection rate reduced by approximately 60.3%.**
 
 ### Before encryption:
 
@@ -51,19 +71,13 @@ Follow the prompt to select a `.py` file. The encrypted file will be saved with 
 
 ---
 
-## Detection Reduction
-
-In a real-world test using a Python-based stealer detected by 24 antivirus engines, 0BeeF reduced detection to 9 engines.
-**Detection rate reduced by approximately 60.3%.**
-
----
-
 ## Recommendations
 
 * Do **not** use `Nuitka` after encryption &mdash; it may optimize away the encryption logic (use the commercial version with flag `--enable-plugin=data-hiding` if needed)
-* If your script is detected by **fewer than 12 AV engines**, you likely don’t need 0BeeF
+* If your script is detected by **fewer than 8 AV engines**, you likely don’t need 0BeeF
 * You **can combine 0BeeF with PyArmor** for better protection
 * Fully compatible with `PyInstaller`, `py2exe`, and similar tools **after** obfuscation
+* Obfuscated imports won't be auto-detected &mdash; add them manually via `hiddenimports`, dummy `import`, or config files
 
 ---
 
