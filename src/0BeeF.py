@@ -307,7 +307,6 @@ if is_vm():
         code_to_process = anti_vm_code + code_to_process
     else:
         code_to_process = code_to_process
-    
 
     try:
         flatten = input("Enable control flow flattening? (y/n): ").strip().lower()
@@ -320,7 +319,9 @@ if is_vm():
     else:
         flattened_code = code_to_process
     try:
-        print(f"[{Fore.YELLOW}!{Fore.RESET}] Self-destruct functionality only works with plain Python scripts (.py) or executables packaged with PyInstaller.")
+        print(
+            f"[{Fore.YELLOW}!{Fore.RESET}] Self-destruct functionality only works with plain Python scripts (.py) or executables packaged with PyInstaller."
+        )
         self_destruct = input("Enable self-destructing? (y/n): ").strip().lower()
     except KeyboardInterrupt:
         print("\nExiting...")
