@@ -19,13 +19,14 @@
 
 ## Features
 
-* Obfuscation using `marshal`, `zlib`, `base64`
-* Multi-layer encryption: Fernet (AES-CBC + HMAC) + XOR key masking
+* Obfuscation
+* Multi-layer encryption
 * Dynamic import injection to avoid static detection
-* In-memory execution via `exec` and `memoryview`
-* RAM wiping using `ctypes.memset`
-* Anti-debugging using `sys.gettrace()` and `_getframe`
-* Virtualized decryption environment using function-index mapping
+* In-memory execution
+* RAM wiping
+* Anti-debugging
+* Anti-VM
+* Virtualized decryption environment
 
 ---
 
@@ -90,12 +91,12 @@ In a real-world test using a Python-based stealer detected by 24 antivirus engin
    ↓
 Encrypted payload
    ↓
-Stub script decrypts and executes code in memory
+The stub script decrypts and executes code in memory
    ↓
 Decrypted memory is wiped after execution
 ```
 
-All decryption and execution occurs in memory, leaving no traces on disk.
+All decryption and execution occur in memory, leaving no traces on disk.
 
 ---
 
