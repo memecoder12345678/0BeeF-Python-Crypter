@@ -332,7 +332,6 @@ if is_vm():
     else:
         is_self_destruct = False
 
-    print(flattened_code)
     try:
         compiled_bytecode = compile(flattened_code, "<obfuscated>", "exec")
     except SyntaxError as e:
