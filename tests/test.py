@@ -1,4 +1,4 @@
 print("Hello, World!")
 
-import math
-print("sqrt(64) =", math.sqrt(64))
+import math as m
+print("sqrt(64) =", m.sqrt(64))

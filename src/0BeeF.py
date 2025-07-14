@@ -13,6 +13,91 @@ from cryptography.fernet import Fernet
 
 init(autoreset=True)
 
+class NameObfuscator(ast.NodeTransformer):
+    def __init__(self):
+        self.name_map = {}
+        self.counter = 0
+
+    def get_new_name(self, old_name):
+        if old_name not in self.name_map:
+            self.name_map[old_name] = f"_beef_{self.counter}"
+            self.counter += 1
+        return self.name_map[old_name]
+
+    def visit_FunctionDef(self, node):
+        node.name = self.get_new_name(node.name)
+        for arg in node.args.args:
+            arg.arg = self.get_new_name(arg.arg)
+        self.generic_visit(node)
+        return node
+
+    def visit_ClassDef(self, node):
+        node.name = self.get_new_name(node.name)
+        self.generic_visit(node)
+        return node
+
+    def visit_Name(self, node):
+        if node.id in self.name_map:
+            node.id = self.name_map[node.id]
+        return node
+
+    def visit_Assign(self, node):
+        self.generic_visit(node)
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                target.id = self.get_new_name(target.id)
+        return node
+
+def rename_identifiers(code):
+    try:
+        tree = ast.parse(code)
+        obfuscator = NameObfuscator()
+        tree = obfuscator.visit(tree)
+        ast.fix_missing_locations(tree)
+        return ast.unparse(tree)
+    except Exception as e:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] AST renaming failed: {str(e)}")
+        return code
+
+class StringEncryptor(ast.NodeTransformer):
+    def __init__(self, key):
+        self.key = key
+
+    def xor(self, data, key):
+        return bytes([b ^ key[i % len(key)] for i, b in enumerate(data)])
+
+    def visit_Constant(self, node):
+        if isinstance(node.value, str) and node.value:
+            encrypted_string = base64.b64encode(self.xor(node.value.encode('utf-8'), self.key)).decode('utf-8')
+            
+            decrypt_func_call = ast.Call(
+                func=ast.Name(id='_beef_sd', ctx=ast.Load()),
+                args=[ast.Constant(value=encrypted_string)],
+                keywords=[]
+            )
+            return decrypt_func_call
+        return node
+
+def encrypt_strings(code):
+    encryption_key = os.urandom(16)
+    try:
+        tree = ast.parse(code)
+        encryptor = StringEncryptor(encryption_key)
+        tree = encryptor.visit(tree)
+        ast.fix_missing_locations(tree)
+        
+        decrypt_stub = f"""
+import base64
+_beef_sk = {list(encryption_key)}
+def _beef_sd(s):
+    d = base64.b64decode(s.encode('utf-8'))
+    k = bytes(_beef_sk)
+    return bytes([b ^ k[i % len(k)] for i, b in enumerate(d)]).decode('utf-8')
+"""
+        return ast.unparse(tree), decrypt_stub
+    except Exception as e:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] String encryption failed: {str(e)}")
+        return code, ""
 
 def flatten_control_flow(code):
     try:
@@ -131,6 +216,7 @@ def encode_b64(data):
 
 def obfuscate_code(code):
     payload_imports = ["import subprocess"]
+    string_decrypt_stub = ""
 
     seen_imports = set(payload_imports)
     for line in code.split("\n"):
@@ -141,7 +227,6 @@ def obfuscate_code(code):
         ):
             seen_imports.add(stripped_line)
             payload_imports.append(stripped_line)
-
 
     encoded_import_lines = []
     for imp_line in payload_imports:
@@ -317,7 +402,20 @@ if is_vm():
         code_to_process = anti_vm_code + code_to_process
     else:
         code_to_process = code_to_process
-
+    try:
+        rename = input("Enable AST renaming (variables, functions)? (y/n): ").strip().lower()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
+    try:
+        string = input("Enable string encryption? (y/n): ").strip().lower()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
+    if rename in ["y", "yes"]:
+        code_to_process = rename_identifiers(code_to_process)
+    if string in ["y", "yes"]:
+        code_to_process, string_decrypt_stub = encrypt_strings(code_to_process)
     try:
         flatten = input("Enable control flow flattening? (y/n): ").strip().lower()
     except KeyboardInterrupt:
@@ -377,6 +475,7 @@ _x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
 _x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA=='){final_import_calls if len(encoded_import_lines) != 0 else ''}
+{string_decrypt_stub}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
