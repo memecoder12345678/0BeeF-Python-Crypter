@@ -9,7 +9,7 @@ import uuid
 import random
 
 from colorama import Fore, init
-from cryptography.fernet import Fernet # type: ignore
+from cryptography.fernet import Fernet
 
 init(autoreset=True)
 
@@ -130,10 +130,9 @@ def encode_b64(data):
 
 
 def obfuscate_code(code):
-    payload_imports = []
+    payload_imports = ["import subprocess"]
 
     seen_imports = set(payload_imports)
-    main_code_lines = []
     for line in code.split("\n"):
         stripped_line = line.strip()
         if (
@@ -142,10 +141,7 @@ def obfuscate_code(code):
         ):
             seen_imports.add(stripped_line)
             payload_imports.append(stripped_line)
-        else:
-            main_code_lines.append(line)
 
-    main_code = "\n".join(main_code_lines)
 
     encoded_import_lines = []
     for imp_line in payload_imports:
@@ -157,9 +153,13 @@ def obfuscate_code(code):
     final_import_calls = "\n".join(
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
-    final_import_calls += "\n"
+    final_import_calls = "\n" + final_import_calls
 
-    anti_debug_code = """def is_debugger_present():
+    anti_debug_code = """import sys
+import os
+import ctypes
+    
+def is_debugger_present():
     debugging_modules = {
         'pdb',
         'debugpy',
@@ -210,11 +210,20 @@ if is_debugger_present():
         sys.exit(0)
 
     if debug in ["y", "yes"]:
-        code_to_process = anti_debug_code + main_code
+        code_to_process = anti_debug_code + code
     else:
-        code_to_process = main_code
+        code_to_process = code
 
-    anti_vm_code = """def is_vm():
+    anti_vm_code = """import ctypes
+import os
+import re
+import subprocess
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+import psutil
+
+def is_vm():
     try:
         output = subprocess.check_output(
             ["wmic", "computersystem", "get", "model"],
@@ -319,7 +328,6 @@ if is_vm():
         flattened_code = flatten_control_flow(code_to_process)
     else:
         flattened_code = code_to_process
-
 
     try:
         compiled_bytecode = compile(flattened_code, "<obfuscated>", "exec")
