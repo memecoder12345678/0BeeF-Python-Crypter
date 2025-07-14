@@ -9,7 +9,7 @@ import uuid
 import random
 
 from colorama import Fore, init
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet # type: ignore
 
 init(autoreset=True)
 
@@ -157,6 +157,7 @@ def obfuscate_code(code):
     final_import_calls = "\n".join(
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
+    final_import_calls += "\n"
 
     anti_debug_code = """def is_debugger_present():
     debugging_modules = {
@@ -318,19 +319,7 @@ if is_vm():
         flattened_code = flatten_control_flow(code_to_process)
     else:
         flattened_code = code_to_process
-    try:
-        print(
-            f"[{Fore.YELLOW}!{Fore.RESET}] Self-destruct functionality only works with plain Python scripts (.py) or executables packaged with PyInstaller."
-        )
-        self_destruct = input("Enable self-destructing? (y/n): ").strip().lower()
-    except KeyboardInterrupt:
-        print("\nExiting...")
-        sys.exit(0)
 
-    if self_destruct in ["y", "yes"]:
-        is_self_destruct = True
-    else:
-        is_self_destruct = False
 
     try:
         compiled_bytecode = compile(flattened_code, "<obfuscated>", "exec")
@@ -379,7 +368,7 @@ _x(b'eJwrNmRgYEgrys9VSM7PSy4tKkrNK9FLKy0pLUotVsjMLcgvKlEIyShKTUwJyM/Pca1ITS4tyS8
 _x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
-_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA=='){("\n" + final_import_calls) if len(encoded_import_lines) != 0 else ''}
+_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA=='){final_import_calls if len(encoded_import_lines) != 0 else ''}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
@@ -420,7 +409,7 @@ try:
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
 except:
-    pass{"\n_x(b'eJyVU7Fu3DAMzdBJXyGgw9mHg9GiW4COLZAhQIbsgmrTthrZMii6yfVvOnTv3K5F/yN/UkpnX+Q73xAOtkA+8T2Sov/75uqqgloqD7ZWFXjCsaQsvxaSzdSyAdJEmPm938lNje479Jud/KythwkVrBwRoSdVGwvyo2R0AU9QjqS/WIgo4AsX8SoelBIREAVVYIEg+rPwGTS1CWHtUCppeom6byD7kISCEe6Xjqkc54uQiMUZT34tcWqMRujct0TBKg6BRuzlPY6wiMNTCQOtCOkGhyTJdHAWC87CW4Ahe1e8f+GbOGLjD21atChtaC5eOb1ZD3RDuH/0B4eqDPKE5ljBKcOZvVm+mAaz4z5MhLtmubsBMSc46S8ri+jCk0byj4babKNuP91s8msp38r79t8v2T3/+VlKev79o5N3+5uesdYCnjdsbdRJVb4dydhVxCFUYEcIkM1v46sz/VH57qA0Px/8peEGG7T3QsR33Dr3oPi5HZfqdNWEUA5NY3ptI+64PoaSiPNzkGXG45SfJZctVAeKrcaGJ73dPjyG08yYaDg4FoRnt04yT9SvT37pohBzgWH10wLEXFwamNIIoSn8eSUbfl6A2Qt1/h/AkGor')" if is_self_destruct else ""}
+    pass 
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
     return stub_code
 
