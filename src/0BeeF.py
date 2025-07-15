@@ -12,6 +12,7 @@ from colorama import Fore, init
 from cryptography.fernet import Fernet
 
 init(autoreset=True)
+# bạn có thể tự custom để tạo stub code riêng
 STUB_CODE = """'''
   ██████╗ ██████╗ ███████╗███████╗███████╗
  ██╔═████╗██╔══██╗██╔════╝██╔════╝██╔════╝
@@ -233,8 +234,74 @@ def xor_encrypt(data, key):
     return bytes(
         a ^ b for a, b in zip(data, (key * ((len(data) // len(key)) + 1))[: len(data)])
     )
+class StringObfuscator(ast.NodeTransformer):
+    def __init__(self):
+        self.in_fstring = False
+
+    def visit_JoinedStr(self, node):
+        prev = self.in_fstring
+        self.in_fstring = True
+        self.generic_visit(node)
+        self.in_fstring = prev
+        return node
+
+    def visit_Constant(self, node):
+        if isinstance(node.value, str) and not self.in_fstring:
+            if len(node.value) < 3:
+                return node
+            if isinstance(node.parent, ast.Expr) and node.parent.value is node:
+                return node
+            key = os.urandom(8)
+
+            encrypted = base64.b64encode(xor_encrypt(node.value.encode(), key)).decode()
+
+            return ast.Call(
+                func=ast.Attribute(
+                    value=ast.Call(
+                        func=ast.Name(id='_d', ctx=ast.Load()),
+                        args=[
+                            ast.Call(
+                                func=ast.Attribute(
+                                    value=ast.Name(id='base64', ctx=ast.Load()),
+                                    attr='b64decode',
+                                    ctx=ast.Load()
+                                ),
+                                args=[ast.Constant(value=encrypted)],
+                                keywords=[]
+                            ),
+                            ast.Constant(value=key)
+                        ],
+                        keywords=[]
+                    ),
+                    attr='decode',
+                    ctx=ast.Load()
+                ),
+                args=[],
+                keywords=[]
+            )
+        return node
 
 
+
+def obfuscate_strings(code):
+    try:
+        tree = ast.parse(code)
+        transformer = StringObfuscator()
+
+        for node in ast.walk(tree):
+            for child in ast.iter_child_nodes(node):
+                child.parent = node
+        
+        new_tree = transformer.visit(tree)
+        ast.fix_missing_locations(new_tree)
+        return ast.unparse(new_tree)
+    except Exception as e:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] String obfuscation failed: {e}")
+        import traceback; traceback.print_exc()
+        return code
+
+    
+    
 def fernet_encrypt(key, data):
     data_bytes = data if isinstance(data, bytes) else data.encode()
     cipher_suite = Fernet(key)
@@ -247,7 +314,6 @@ def encode_b64(data):
 
 def obfuscate_code(code):
     code_to_process = code
-    string_decrypt_stub = ""
     payload_imports = []
     seen_imports = set(payload_imports)
     for line in code.split("\n"):
@@ -413,6 +479,7 @@ if is_vm():
     try:
         enable_anti_debug = input("Enable anti-debugging? (y/n): ").strip().lower()
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
+        enable_string_obf = input("Enable string obfuscation? (y/n): ")
         enable_flatten = (
             input("Enable control flow flattening? (y/n): ").strip().lower()
         )
@@ -425,10 +492,12 @@ if is_vm():
         code_to_process = anti_debug_code + code_to_process
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
-    final_code = string_decrypt_stub + code_to_process
+    if enable_string_obf in ["y", "yes"]:
+        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Obfuscating strings...")
+        code_to_process = obfuscate_strings(code_to_process)
     print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Compiling and packing final payload...")
     try:
-        compiled_bytecode = compile(final_code, "<obfuscated>", "exec")
+        compiled_bytecode = compile(code_to_process, "<obfuscated>", "exec")
     except SyntaxError as e:
         print(
             f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}"
