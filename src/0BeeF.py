@@ -12,7 +12,7 @@ from colorama import Fore, init
 from cryptography.fernet import Fernet
 
 init(autoreset=True)
-# bạn có thể tự custom để tạo stub code riêng
+# You can customize it to create your own stub code
 STUB_CODE = """'''
   ██████╗ ██████╗ ███████╗███████╗███████╗
  ██╔═████╗██╔══██╗██╔════╝██╔════╝██╔════╝
