@@ -352,6 +352,10 @@ def is_debugger_present():
     if hasattr(sys, 'gettrace') and sys.gettrace() is not None:
         return True
 
+    import os as oos
+    if oos._exit is not os.exit:
+        oos.exit(0)
+
     try:
         if hasattr(sys, '_getframe') and sys._getframe(1).f_trace is not None:
             return True
@@ -439,6 +443,9 @@ def is_vm():
     ]
     if any(os.path.exists(path) for path in paths):
         return True
+    import os as oos
+    if oos._exit is not os.exit:
+        oos.exit(0)
     try:
         if bool(ctypes.windll.kernel32.IsProcessorFeaturePresent(29)):
             return True
