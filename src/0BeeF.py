@@ -28,9 +28,7 @@ _x(b'eJwr5mZgYMjMLcgvKlGoyslMAgAi6ATr')
 _x(b'eJwr5mNgYMjMLcgvKlHITSwqzkjMAQA0GQYl')
 _x(b'eJwr5mVgYMjMLcgvKlFILqksSC0GAC4lBdQ=')
 _x(b'eJwrVmNgYEgrys9VSC6qLCjJTy9KLMio1EtLLcpLLVHIzC3ILypRcAPzAD/TD4s=')
-_x(b'eJwr5mZgYMjMLcgvKlHITSzJAAAirwTk')
 _x(b'eJwr5mVgYMjMLcgvKlEoSsxLyc8FAC3eBb0=')
-_x(b'eJwr5mVgYMjMLcgvKlFILEmtyCwBAC3qBcs=')
 _x(b'eJwr5mRgYMjMLcgvKlEoSgUAGUMEDw==')
 _x(b'eJwrFmRgYMjMLcgvKlEoLk0qKMpPTi0uBgBKCAeJ')
 _x(b'eJwr5mZgYMjMLcgvKlEoycxNBQAi0gTp')
@@ -38,7 +36,9 @@ _x(b'eJwrNmRgYEgrys9VSM7PSy4tKkrNK9FLKy0pLUotVsjMLcgvKlEIyShKTUwJyM/Pca1ITS4tyS8
 _x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
-_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA=='){}
+_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA==')
+_x(b'eJwr5mVgYMjMLcgvKlEoz8wrSk0HAC40Bcg=')
+_x(b'eJwr5mdgYMjMLcgvKlHIL0gtSizJLwIAOwwGqg=='){}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
     _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
@@ -79,7 +79,7 @@ try:
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
 except:
-    pass 
+    pass
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
 
 
@@ -314,7 +314,7 @@ def encode_b64(data):
 
 def obfuscate_code(code):
     code_to_process = code
-    payload_imports = []
+    payload_imports = ["import operator"]
     seen_imports = set(payload_imports)
     for line in code.split("\n"):
         stripped_line = line.strip()
@@ -352,9 +352,6 @@ def is_debugger_present():
     if hasattr(sys, 'gettrace') and sys.gettrace() is not None:
         return True
 
-    import os as oos
-    if oos._exit is not os.exit:
-        oos.exit(0)
 
     try:
         if hasattr(sys, '_getframe') and sys._getframe(1).f_trace is not None:
@@ -383,7 +380,10 @@ def is_debugger_present():
     return False
 
 if is_debugger_present():
-    os._exit(1)
+    import os as oos
+    if oos._exit is not os._exit:
+        oos._exit(0)
+    os._exit(0)
 
 """
     anti_vm_code = """import ctypes
@@ -391,6 +391,7 @@ import os
 import re
 import subprocess
 import time
+import winreg
 from concurrent.futures import ThreadPoolExecutor
 
 import psutil
@@ -443,9 +444,6 @@ def is_vm():
     ]
     if any(os.path.exists(path) for path in paths):
         return True
-    import os as oos
-    if oos._exit is not os.exit:
-        oos.exit(0)
     try:
         if bool(ctypes.windll.kernel32.IsProcessorFeaturePresent(29)):
             return True
@@ -476,15 +474,27 @@ def is_vm():
         pass
     if time.perf_counter() - start_time > 0.5:
         return True
-
+    try:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             'HARDWARE\\\\DESCRIPTION\\\\System')
+        bios_info = winreg.QueryValueEx(key, 'SystemBiosVersion')[0]
+        if any(vm in bios_info for vm in ['VMWARE', 'VIRTUAL', 'QEMU', 'XEN']):
+            return True
+    except:
+        pass
+        
     return False
 
 if is_vm():
-    os._exit(1)
+    import os as oos
+    if oos._exit is not os._exit:
+        oos._exit(0)
+    os._exit(0)
 
 """
     try:
         enable_anti_debug = input("Enable anti-debugging? (y/n): ").strip().lower()
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines.")
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
         enable_string_obf = input("Enable string obfuscation? (y/n): ")
         enable_flatten = (
@@ -500,7 +510,6 @@ if is_vm():
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
     if enable_string_obf in ["y", "yes"]:
-        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Obfuscating strings...")
         code_to_process = obfuscate_strings(code_to_process)
     print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Compiling and packing final payload...")
     try:
