@@ -314,7 +314,7 @@ def encode_b64(data):
 
 def obfuscate_code(code):
     code_to_process = code
-    payload_imports = ["import operator"]
+    payload_imports = []
     seen_imports = set(payload_imports)
     for line in code.split("\n"):
         stripped_line = line.strip()
