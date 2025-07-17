@@ -60,9 +60,6 @@ _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), 
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
 _f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))
 _f.append(getattr(__import__(''.join(map(chr, [114, 97, 110, 100, 111, 109]))), ''.join(map(chr, [114, 97, 110, 100, 105, 110, 116]))))
-_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [122, 101, 114, 111, 105, 122, 101, 49]))))
-_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [109, 108, 111, 99, 107]))))
-_f.append(getattr(__import__(''.join(map(chr, [122, 101, 114, 111, 105, 122, 101]))), ''.join(map(chr, [109, 117, 110, 108, 111, 99, 107]))))
 _d_f = {}
 _k_m = {}
 _k_md = {}
