@@ -352,7 +352,7 @@ def obfuscate_code(code):
         sys.exit(0)
     if enable_anti_vm in ["y", "yes"]:
         final_import_calls += (
-            ("" if len(final_import_calls) == 0 else "\n")
+            ("" if len(encoded_import_lines) == 0 else "\n")
             + "_x(b'eJzNVm1v2zYQ7mfvT+ibZCARlGQpVgMZ4DryYiR+qe06G+JAoKWzTUQSBZLyC9r+9x1F2ZIcAck2DBuRWMd745HP3ZFi9NOHDzRKGJfGlsYcVo1GAEuDCm8TWc1Ww8Ah+V4TarBUJqk0bgyRLhLOfBDC9tfgv3haYh011XgytxH1zTPD9FmEUuBiLyREirMCqT4RCyA0n88qdhD7LKDx6sZM5fL8F7MqlTQCXO3mqsr2ORBJWbwMyUrclOLrjN321PUGQ++xN7gdPhZmzSNFlwaJ99XoN5FB43zHFcGS8Vz4VOGrYc4olykJT2LWov6WcKiVaKPPbFcnvdsnwM9ndaIvbv9rHf9+1q9jjwgnYQihOBE+F0fSqgg4yJTHxpSnkPFh50MiDat8vMpjMNIzl3PGz8rZMdVoubuEcghK7hMixD9PMEyjiPj/iwRaMBZaJ6dnCyDcX1uvoOCm5Tgt57r18dN3RXRalxlxjX8fFXHRaV38nImuWt3ud63sOE0smpqUbP6XACZErgVCVlSD2WnN5+hxxUlkdGkIYj7X2X/4GlM8rXIa1pkMOfFDZXIsD+O3FIQ02kFAFVSvHDzSOGBbNJ1kjebqcj4PON1g40EvaJ+Z29iF/qphn6UC/o7hpFtndbLR3Ek7SXDSpz5ngi2lnbMnJA4WbOflTnSx5h2LCVsdvw07KqSwFN3MGpSiVIvKwCmhdpoQleo7ZLEvseUIG++EIAztF+AxhFeXdk/kWcJ4F2sl5TDiICCW1uWn5jsTry0lpwu8C/JMG04y4s3G8GZot7BIVyvgh5D+hYBEKjxVFirZvxWAbiKpkjkog7xBwATwDfXLDd/cYg2JNeEvZeaSBkEIvMwSGnJaMc4rck38l6P2j+x3SxHs6RobWDDCUNwd+Klk3GoaROBG9azY0DJV2FV3oY9Ea9pY/hGVVkiiRUAMtW4r+7VpvGQ29lzLjEkE6gI3m3bItoBrnWUqTa356sJUzCwfRSppaOd78Sg+Cqwn7e256GI/Tm9mHbKNUachYqs8FWgo/1pB8fPdvQG/kIRLT10FeAzqY+Mlu/R8lsYqJB2Kcuwpn5zEK7AuPMdx1H9dcmCgNW6M8/JKvxqOff3OWnyBPUamn2X2MIH4HvZWPr27d//wHoad9oPXb3fuegP39WVfGeZde3z72B678/mtO+mMe6Npbzg4NC2zOPgFZQgKolys/SUFvp+RMAV3Z2FUCLo2+4y6M2x02IjN5pPzfIqZfiMVHkvvJnwLqWhUAs164+nX9oMi9WvGMH93B5gM7ynfGhzUaJQsuiQU0GjQk2dt/uxlQpUIY0cMkbQ97KYS1Y2YKQ09L71RDizL0QdXnjf+BKeQLG0=')"
         )
     if enable_anti_debug in ["y", "yes"]:
