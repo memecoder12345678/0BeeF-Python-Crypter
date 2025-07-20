@@ -394,7 +394,7 @@ if __name__ == "__main__":
     print(Fore.LIGHTRED_EX + " ████╔╝██║██╔══██╗██╔══╝  ██╔══╝  ██╔══╝")
     print(Fore.LIGHTRED_EX + " ╚██████╔╝██████╔╝███████╗███████╗██║")
     print(Fore.LIGHTRED_EX + "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩\n")
-    print('"Once is enough. After that - burn it all."')
+    print(Fore.LIGHTRED_EX + '"Once is enough. After that - burn it all."')
     print(
         f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.9+ is recommended for maximum effectiveness."
     )
