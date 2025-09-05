@@ -6,14 +6,14 @@
 
 ## Overview
 
-**0BeeF** is a powerful crypter and obfuscation tool for Python scripts. It is designed to:
+**0BeeF** is a crypter and obfuscation tool for Python scripts. It is designed to:
 
 * Obfuscate code at a deep level
-* Encrypt payloads with multiple layers (Fernet + XOR)
+* Encrypt payloads with multiple layers
 * Execute decrypted payloads fully in-memory
 * Evade antivirus (AV) detection
 * Resist static and dynamic reverse engineering
-* Wipe memory to remove traces after execution
+* Wipe memory after execution
 
 ---
 
@@ -79,24 +79,6 @@ In a real-world test using a Python-based stealer detected by 24 antivirus engin
 * You **can combine 0BeeF with PyArmor** for better protection
 * Fully compatible with `PyInstaller`, `py2exe`, and similar tools **after** obfuscation
 * Obfuscated imports won't be auto-detected &mdash; add them manually via `hiddenimports`, dummy `import`, or config files
-
----
-
-## How It Works
-
-```
-[ Python code ]
-   ↓
-[ marshal → zlib → base64 → Fernet → XOR ]
-   ↓
-Encrypted payload
-   ↓
-The stub script decrypts and executes code in memory
-   ↓
-Decrypted memory is wiped after execution
-```
-
-All decryption and execution occur in memory, leaving no traces on disk.
 
 ---
 
