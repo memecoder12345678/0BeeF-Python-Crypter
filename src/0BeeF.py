@@ -74,7 +74,7 @@ _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
-_f[7](_f[2](getattr(_v_m, ''.join(map(chr, [116, 111, 98, 121, 116, 101, 115]))))(), getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [103, 108, 111, 98, 97, 108, 115])))())
+_f[7](_f[2](getattr(_v_m, ''.join(map(chr, [116, 111, 98, 121, 116, 101, 115])))()), getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [103, 108, 111, 98, 97, 108, 115])))())
 try:
     for _p in [0x00, 0xFF, _f[12](0, 255)]:
         getattr(_f[11](_f[10](_f[9], ''.join(map(chr, [102, 114, 111, 109, 95, 98, 117, 102, 102, 101, 114])))(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121])))(_v_d_b))), _p, getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [108, 101, 110])))(_v_d_b))
@@ -452,7 +452,7 @@ def obfuscate_code(code):
         sys.exit(2)
     if enable_bytecode_obf in ["y", "yes"]:
         print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying bytecode-level obfuscation...")
-        compiled_bytecode = obfuscate_bytecode_layer(compiled_bytecode, seed=random.randint(1, 10^10))
+        compiled_bytecode = obfuscate_bytecode_layer(compiled_bytecode, seed=random.randint(1, 10**10))
     marshalled_bytecode = marshal.dumps(compiled_bytecode)
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
