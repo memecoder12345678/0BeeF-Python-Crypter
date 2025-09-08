@@ -12,6 +12,7 @@
 * Encrypt payloads with multiple layers
 * Execute decrypted payloads fully in-memory
 * Evade antivirus (AV) detection
+* Bytecode-level obfuscation
 * Resist static and dynamic reverse engineering
 * Wipe memory after execution
 
@@ -25,6 +26,7 @@
 * In-memory execution
 * RAM wiping
 * Anti-debugging
+* Bytecode-level obfuscation
 * Anti-VM
 * Virtualized decryption environment
 
