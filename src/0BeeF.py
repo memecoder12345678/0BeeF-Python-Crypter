@@ -95,6 +95,7 @@ def shuffle_list(lst: list, protect: set = set()) -> list:
         new_list[target_idx] = lst[original_idx]
     return new_list
 
+
 def _collect_imported_names(co: types.CodeType) -> set:
     imported = set()
     for instr in dis.get_instructions(co):
@@ -102,32 +103,6 @@ def _collect_imported_names(co: types.CodeType) -> set:
             imported.add(str(instr.argval).split(".")[0])
     return imported
 
-def inject_raw_beef_trap(co: types.CodeType) -> types.CodeType:
-    original_bytes = co.co_code
-    jump_op = opcode.opmap['JUMP_FORWARD']
-    
-    if sys.version_info >= (3, 10):
-        jump_arg = 1
-    else:
-        jump_arg = 2
-        
-    prologue = bytes([
-        jump_op, jump_arg,
-        0x42, 0x46
-    ])
-
-    new_code_bytes = prologue + original_bytes
-
-    try:
-        return co.replace(co_code=new_code_bytes)
-    except Exception:
-        return types.CodeType(
-            co.co_argcount, co.co_posonlyargcount, co.co_kwonlyargcount,
-            co.co_nlocals, co.co_stacksize, co.co_flags, new_code_bytes,
-            co.co_consts, co.co_names, co.co_varnames, co.co_filename,
-            co.co_name, co.co_firstlineno, co.co_lnotab, co.co_freevars,
-            co.co_cellvars
-        )
 
 def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.CodeType:
     if seed is not None:
@@ -141,7 +116,11 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
             processed_consts.append(c)
 
     builtins_set = set(dir(__builtins__))
-    specials = {n for n in co.co_names if isinstance(n, str) and n.startswith("__") and n.endswith("__")}
+    specials = {
+        n
+        for n in co.co_names
+        if isinstance(n, str) and n.startswith("__") and n.endswith("__")
+    }
     imported = _collect_imported_names(co)
     protect_names = builtins_set | specials | imported
 
@@ -150,14 +129,15 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
         bc.consts = shuffle_list(processed_consts, protect={None})
         bc.names = shuffle_list(list(co.co_names), protect=protect_names)
         bc.flags = co.co_flags
-        temp_co = bc.to_code()
+        final_co = bc.to_code()
     except Exception as e:
-        print(f"[{Fore.YELLOW}!{Fore.RESET}] Lỗi xáo trộn bytecode: {e}, bỏ qua bước này.")
-        temp_co = co
-    
-    final_co = inject_raw_beef_trap(temp_co)
-        
+        print(
+            f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}, skip this step."
+        )
+        final_co = co
+
     return final_co
+
 
 def is_perfect_square(n):
     if n < 0:
@@ -421,13 +401,34 @@ def obfuscate_code(code):
             f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines."
         )
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
-        enable_string_obf = input("Enable string obfuscation? (y/n): ")
-        enable_flatten = (
-            input("Enable control flow flattening? (y/n): ").strip().lower()
-        )
-        enable_bytecode_obf = (
-            input("Enable bytecode obfuscation (shuffle constants + anti-decompiler trap)? (y/n): ").strip().lower()
-        )
+        if sys.version_info < (3, 11):
+            print(
+                f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening requires Python 3.11+ to work properly."
+            )
+            enable_flatten = "n"
+            print(
+                f"[{Fore.YELLOW}!{Fore.RESET}] String obfuscation requires Python 3.11+ to work properly."
+            )
+            enable_string_obf = "n"
+            print(
+                f"[{Fore.YELLOW}!{Fore.RESET}] Bytecode obfuscation requires Python 3.11+ to work properly."
+            )
+            enable_bytecode_obf = "n"
+        else:
+            enable_flatten = (
+                input("Enable control flow flattening? (y/n): ").strip().lower()
+            )
+            enable_string_obf = (
+                input("Enable string obfuscation? (y/n): ").strip().lower()
+            )
+            enable_bytecode_obf = (
+                input(
+                    "Enable bytecode obfuscation (shuffle constants + anti-decompiler trap)? (y/n): "
+                )
+                .strip()
+                .lower()
+            )
+
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
@@ -451,8 +452,12 @@ def obfuscate_code(code):
         )
         sys.exit(2)
     if enable_bytecode_obf in ["y", "yes"]:
-        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying bytecode-level obfuscation...")
-        compiled_bytecode = obfuscate_bytecode_layer(compiled_bytecode, seed=random.randint(1, 10**10))
+        print(
+            f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying bytecode-level obfuscation..."
+        )
+        compiled_bytecode = obfuscate_bytecode_layer(
+            compiled_bytecode, seed=random.randint(1, 10**10)
+        )
     marshalled_bytecode = marshal.dumps(compiled_bytecode)
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
@@ -480,8 +485,12 @@ if __name__ == "__main__":
     print(Fore.LIGHTRED_EX + "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩\n")
     print(Fore.LIGHTRED_EX + '"Once is enough. After that - burn it all."')
     print(
-        f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.9+ is recommended for maximum effectiveness."
+        f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.11+ is recommended for maximum effectiveness."
     )
+    if sys.version_info < (3, 11):
+        print(
+            f"[{Fore.YELLOW}!{Fore.RESET}] You are using Python {sys.version_info.major}.{sys.version_info.minor}, some obfuscation features may not work as intended."
+        )
     try:
         file_path = (
             input("Enter the path to the .py file you want to obfuscate: ")
@@ -503,4 +512,3 @@ if __name__ == "__main__":
     print(
         f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Crypted file created: {output_filename}"
     )
-
