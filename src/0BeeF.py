@@ -26,7 +26,7 @@ STUB_CODE = """'''
   ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩
 "Once is enough. After that - burn it all."
 '''
-def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), globals())
+def _x(p): getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [101, 120, 101, 99])))(getattr(__import__(''.join(map(chr, [109, 97, 114, 115, 104, 97, 108]))), ''.join(map(chr, [108, 111, 97, 100, 115])))(getattr(__import__(''.join(map(chr, [122, 108, 105, 98]))), ''.join(map(chr, [100, 101, 99, 111, 109, 112, 114, 101, 115, 115])))(getattr(__import__(''.join(map(chr, [98, 97, 115, 101, 54, 52]))), ''.join(map(chr, [98, 54, 52, 100, 101, 99, 111, 100, 101])))(p))), getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [103, 108, 111, 98, 97, 108, 115])))())
 _x(b'eJwr5mJgYMjMLcgvKlEoriwGAB3+BJg=')
 _x(b'eJwr5mVgYMjMLcgvKlFISixONTMBACzqBUE=')
 _x(b'eJwr5mZgYMjMLcgvKlGoyslMAgAi6ATr')
@@ -41,29 +41,28 @@ _x(b'eJwrNmRgYEgrys9VSM7PSy4tKkrNK9FLKy0pLUotVsjMLcgvKlEIyShKTUwJyM/Pca1ITS4tyS8
 _x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
-_x(b'eJwr5mdgYMjMLcgvKlEoSc0tSMvMSQUAOu0GlA==')
 _x(b'eJwr5mVgYMjMLcgvKlEoz8wrSk0HAC40Bcg=')
 _x(b'eJwr5mdgYMjMLcgvKlHIL0gtSizJLwIAOwwGqg=='){}
 def _d(d, k):
     _m, _a, _f, _x = (getattr(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [95, 95, 105, 109, 112, 111, 114, 116, 95, 95])))(''.join(map(chr, [111, 112, 101, 114, 97, 116, 111, 114]))), ''.join(map(chr, n))) for n in [[109, 117, 108], [97, 100, 100], [102, 108, 111, 111, 114, 100, 105, 118], [120, 111, 114]])
-    _k_ext = _m(k, _a(_f(len(d), len(k)), 1))
-    return bytes(map(_x, d, _k_ext))
+    _k_ext = _m(k, _a(_f(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [108, 101, 110])))(d), getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [108, 101, 110])))(k)), 1))
+    return getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [98, 121, 116, 101, 115])))(map(_x, d, _k_ext))
 _f = []
 _g = lambda m, f: getattr(__import__(''.join(map(chr, m))), ''.join(map(chr, f)))
 _b = ''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))
-_f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 115]))))
-_f.append(_g([98, 97, 115, 101, 54, 52], [98, 54, 52, 100, 101, 99, 111, 100, 101]))
-_f.append(_g([109, 97, 114, 115, 104, 97, 108], [108, 111, 97, 100, 115]))
-_f.append(_g([122, 108, 105, 98], [100, 101, 99, 111, 109, 112, 114, 101, 115, 115]))
-_f.append(getattr(__import__(''.join(map(chr, [99, 114, 121, 112, 116, 111, 103, 114, 97, 112, 104, 121, 46, 102, 101, 114, 110, 101, 116])), fromlist=[''.join(map(chr, [70, 101, 114, 110, 101, 116]))]), ''.join(map(chr, [70, 101, 114, 110, 101, 116]))))
-_f.append(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121]))))
-_f.append(getattr(__import__(_b), ''.join(map(chr, [109, 101, 109, 111, 114, 121, 118, 105, 101, 119]))))
-_f.append(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
-_f.append(_d)
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114]))))
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
-_f.append(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))
-_f.append(getattr(__import__(''.join(map(chr, [114, 97, 110, 100, 111, 109]))), ''.join(map(chr, [114, 97, 110, 100, 105, 110, 116]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 115]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(_g([98, 97, 115, 101, 54, 52], [98, 54, 52, 100, 101, 99, 111, 100, 101]))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(_g([109, 97, 114, 115, 104, 97, 108], [108, 111, 97, 100, 115]))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(_g([122, 108, 105, 98], [100, 101, 99, 111, 109, 112, 114, 101, 115, 115]))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(''.join(map(chr, [99, 114, 121, 112, 116, 111, 103, 114, 97, 112, 104, 121, 46, 102, 101, 114, 110, 101, 116])), fromlist=[''.join(map(chr, [70, 101, 114, 110, 101, 116]))]), ''.join(map(chr, [70, 101, 114, 110, 101, 116]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(_b), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(_b), ''.join(map(chr, [109, 101, 109, 111, 114, 121, 118, 105, 101, 119]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(_b), ''.join(map(chr, [101, 120, 101, 99]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(_d)
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))), ''.join(map(chr, [99, 95, 99, 104, 97, 114]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [97, 100, 100, 114, 101, 115, 115, 111, 102]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(''.join(map(chr, [99, 116, 121, 112, 101, 115]))),''.join(map(chr, [109, 101, 109, 115, 101, 116]))))
+getattr(_f, ''.join(map(chr, [97, 112, 112, 101, 110, 100])))(getattr(__import__(''.join(map(chr, [114, 97, 110, 100, 111, 109]))), ''.join(map(chr, [114, 97, 110, 100, 105, 110, 116]))))
 _d_f = {}
 _k_m = {}
 _k_md = {}
@@ -75,13 +74,12 @@ _p3 = _f[3](_p2)
 _p4 = _f[1](_p3)
 _v_d_b = getattr(_v_c, ''.join(map(chr, [100, 101, 99, 114, 121, 112, 116])))(_p4)
 _v_m = _f[6](_v_d_b)
-_f[7](_f[2](_v_m.tobytes()), globals())
+_f[7](_f[2](getattr(_v_m, ''.join(map(chr, [116, 111, 98, 121, 116, 101, 115]))))(), getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [103, 108, 111, 98, 97, 108, 115])))())
 try:
-    for pattern in [0x00, 0xFF, _f[12](0, 255)]:
-        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_d_b))), pattern, len(_v_d_b))
-        _f[11](_f[10](_f[9].from_buffer(bytearray(_v_m))), pattern, len(_v_m))
-except:
-    pass
+    for _p in [0x00, 0xFF, _f[12](0, 255)]:
+        getattr(_f[11](_f[10](_f[9], ''.join(map(chr, [102, 114, 111, 109, 95, 98, 117, 102, 102, 101, 114])))(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121])))(_v_d_b))), _p, getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [108, 101, 110])))(_v_d_b))
+        getattr(_f[11](_f[10](_f[9], ''.join(map(chr, [102, 114, 111, 109, 95, 98, 117, 102, 102, 101, 114])))(getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [98, 121, 116, 101, 97, 114, 114, 97, 121])))(_v_m))), _p, getattr(__import__(''.join(map(chr, [98, 117, 105, 108, 116, 105, 110, 115]))), ''.join(map(chr, [108, 101, 110])))(_v_m))
+except: pass
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
 
 
