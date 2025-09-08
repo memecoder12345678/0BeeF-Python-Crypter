@@ -10,6 +10,10 @@ import math
 import random
 from colorama import Fore, init
 from cryptography.fernet import Fernet
+import dis
+import types
+import opcode
+import bytecode
 
 init(autoreset=True)
 # You can customize it to create your own stub code
@@ -80,6 +84,82 @@ except:
     pass
 del _d_f, _k_m, _k_md, _v_k, _v_c, _p1, _p2, _p3, _p4, _v_d_b, _v_m, _f, _g, _b"""
 
+
+def shuffle_list(lst: list, protect: set = set()) -> list:
+    n = len(lst)
+    new_list = list(lst)
+    movable_indices = [i for i in range(n) if lst[i] not in protect]
+    if not movable_indices:
+        return new_list
+    shuffled_movable_indices = movable_indices[:]
+    random.shuffle(shuffled_movable_indices)
+    for target_idx, original_idx in zip(movable_indices, shuffled_movable_indices):
+        new_list[target_idx] = lst[original_idx]
+    return new_list
+
+def _collect_imported_names(co: types.CodeType) -> set:
+    imported = set()
+    for instr in dis.get_instructions(co):
+        if instr.opname in ("IMPORT_NAME", "IMPORT_FROM") and instr.argval:
+            imported.add(str(instr.argval).split(".")[0])
+    return imported
+
+def inject_raw_beef_trap(co: types.CodeType) -> types.CodeType:
+    original_bytes = co.co_code
+    jump_op = opcode.opmap['JUMP_FORWARD']
+    
+    if sys.version_info >= (3, 10):
+        jump_arg = 1
+    else:
+        jump_arg = 2
+        
+    prologue = bytes([
+        jump_op, jump_arg,
+        0xBE, 0xEF
+    ])
+
+    new_code_bytes = prologue + original_bytes
+
+    try:
+        return co.replace(co_code=new_code_bytes)
+    except Exception:
+        return types.CodeType(
+            co.co_argcount, co.co_posonlyargcount, co.co_kwonlyargcount,
+            co.co_nlocals, co.co_stacksize, co.co_flags, new_code_bytes,
+            co.co_consts, co.co_names, co.co_varnames, co.co_filename,
+            co.co_name, co.co_firstlineno, co.co_lnotab, co.co_freevars,
+            co.co_cellvars
+        )
+
+def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.CodeType:
+    if seed is not None:
+        random.seed(seed)
+
+    processed_consts = []
+    for c in co.co_consts:
+        if isinstance(c, types.CodeType):
+            processed_consts.append(obfuscate_bytecode_layer(c, seed=seed))
+        else:
+            processed_consts.append(c)
+
+    builtins_set = set(dir(__builtins__))
+    specials = {n for n in co.co_names if isinstance(n, str) and n.startswith("__") and n.endswith("__")}
+    imported = _collect_imported_names(co)
+    protect_names = builtins_set | specials | imported
+
+    try:
+        bc = bytecode.Bytecode.from_code(co)
+        bc.consts = shuffle_list(processed_consts, protect={None})
+        bc.names = shuffle_list(list(co.co_names), protect=protect_names)
+        bc.flags = co.co_flags
+        temp_co = bc.to_code()
+    except Exception as e:
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] Lỗi xáo trộn bytecode: {e}, bỏ qua bước này.")
+        temp_co = co
+    
+    final_co = inject_raw_beef_trap(temp_co)
+        
+    return final_co
 
 def is_perfect_square(n):
     if n < 0:
@@ -347,6 +427,9 @@ def obfuscate_code(code):
         enable_flatten = (
             input("Enable control flow flattening? (y/n): ").strip().lower()
         )
+        enable_bytecode_obf = (
+            input("Enable bytecode obfuscation (shuffle constants + anti-decompiler trap)? (y/n): ").strip().lower()
+        )
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
@@ -369,6 +452,9 @@ def obfuscate_code(code):
             f"[{Fore.LIGHTRED_EX}-{Fore.RESET}] Syntax error in your file, could not compile: {e}"
         )
         sys.exit(2)
+    if enable_bytecode_obf in ["y", "yes"]:
+        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying bytecode-level obfuscation...")
+        compiled_bytecode = obfuscate_bytecode_layer(compiled_bytecode, seed=random.randint(1, 10^10))
     marshalled_bytecode = marshal.dumps(compiled_bytecode)
     encryption_key = Fernet.generate_key()
     mask_key = os.urandom(len(encryption_key))
