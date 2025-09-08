@@ -113,7 +113,7 @@ def inject_raw_beef_trap(co: types.CodeType) -> types.CodeType:
         
     prologue = bytes([
         jump_op, jump_arg,
-        0xBE, 0xEF
+        0x42, 0x46
     ])
 
     new_code_bytes = prologue + original_bytes
@@ -503,3 +503,4 @@ if __name__ == "__main__":
     print(
         f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Crypted file created: {output_filename}"
     )
+
