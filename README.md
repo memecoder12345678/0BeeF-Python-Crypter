@@ -1,68 +1,60 @@
-# 0BeeF 🥩
+<p align="center">
+  <h1 align="center">0BeeF Python Crypter 🥩</h1>
+  <p align="center">
+    A Crypter & Virtual Execution Runtime designed for security research and protection.
+  </p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/python-3.11%2B-blue?style=for-the-badge&logo=python" alt="Python 3.11+" />
+    <img src="https://img.shields.io/badge/build-passing-green?style=for-the-badge&logo=githubactions" alt="Build Status" />
+    <img src="https://img.shields.io/github/stars/memecoder12345678/0BeeF-Python-Crypter?style=for-the-badge&color=green&logo=github">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge&logo=apache" alt="License" /></a>
+  </p>
+</p>
 
-**Python Crypter & Virtual Execution Runtime**
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Why 0BeeF?](#why-0beef)
+- [Effectiveness Demo](#effectiveness-demo)
+- [Core Features](#core-features)
+- [Getting Started](#getting-started)
+- [Recommendations](#recommendations)
+- [Contributing](#contributing)
+- [License](#license)
+- [Disclaimer](#disclaimer)
+- [Author](#author)
 
 ---
 
 ## Overview
 
-**0BeeF** is a crypter and obfuscation tool for Python scripts. It is designed to:
+**0BeeF** is a crypter and obfuscator for Python, built for **security research** and **source code protection**.
 
-* Obfuscate code at a deep level
-* Encrypt payloads with multiple layers
-* Execute decrypted payloads fully in-memory
-* Evade antivirus (AV) detection
-* Bytecode-level obfuscation
-* Resist static and dynamic reverse engineering
-* Wipe memory after execution
+This project is designed to hide and protect Python scripts from prying eyes—**0BeeF bridges the gap between simple encryption and sophisticated evasion techniques.**
 
----
+It offers:
 
-## Features
-
-* Obfuscation
-* Multi-layer encryption
-* Dynamic import injection to avoid static detection
-* In-memory execution
-* RAM wiping
-* Anti-debugging
-* Bytecode-level obfuscation
-* Anti-VM
-* Virtualized decryption environment
+*   A multi-layer encryption mechanism to protect payloads.
+*   Fully in-memory execution to evade static analysis.
+*   Anti-debugging and anti-VM techniques.
+*   Bytecode-level obfuscation.
+*   A simple, easy-to-use command-line interface.
 
 ---
 
+## Why 0BeeF?
 
-### Installation
-
-First, clone the 0BeeF repository to your local machine:
-
-```bash
-git clone https://github.com/memecoder12345678/0BeeF-Python-Crypter.git
-cd 0BeeF
-```
-
-Install all required libraries via:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-## Usage
-
-```bash
-python ./src/0BeeF.py
-```
-
-Follow the prompt to select a `.py` file. The encrypted file will be saved with the prefix `0BeeF_`.
+*   **Great for security researchers** who want to learn about evasion techniques.
+*   **Useful for developers** who must protect their intellectual property in Python scripts.
+*   **Optimized for security over performance** — designed for tasks that require confidentiality rather than large-scale processing speed.
 
 ---
 
-## Detection Reduction
+## Effectiveness Demo
 
-In a real-world test using a Python-based stealer detected by 24 antivirus engines, 0BeeF reduced detection to 9 engines.
-**Detection rate reduced by approximately 62.5%.**
+Here is a real-world result of using 0BeeF on a Python-based stealer. The detection rate was **reduced by approximately 62.5%**.
 
 ### Before encryption:
 
@@ -74,31 +66,77 @@ In a real-world test using a Python-based stealer detected by 24 antivirus engin
 
 ---
 
+## Core Features
+
+* **Multi-Layer Encryption** — Hardens the payload against decryption attempts.
+* **In-Memory Execution** — The payload is decrypted and run entirely in RAM.
+* **Memory Wiping** — Automatically clears traces after execution.
+* **Bytecode Obfuscation** — Resists static analysis and reverse engineering.
+* **Anti-Debug & Anti-VM** — Detects and evades analysis environments.
+* **High Compatibility** — Works well with PyInstaller and similar tools.
+
+---
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/memecoder12345678/0BeeF-Python-Crypter.git
+cd 0BeeF
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run 0BeeF
+
+```bash
+python ./src/0BeeF.py
+```
+
+Then, follow the on-screen prompts to select the Python file you want to encrypt. The output file will be prefixed with `0BeeF_`.
+
+---
+
 ## Recommendations
 
-* Do **not** use `Nuitka` after encryption &mdash; it may optimize away the encryption logic (use the commercial version with flag `--enable-plugin=data-hiding` if needed)
-* If your script is detected by **fewer than 8 AV engines**, you likely don’t need 0BeeF
-* You **can combine 0BeeF with PyArmor** for better protection
-* Fully compatible with `PyInstaller`, `py2exe`, and similar tools **after** obfuscation
-* Obfuscated imports won't be auto-detected &mdash; add them manually via `hiddenimports`, dummy `import`, or config files
+*   **Do not use `Nuitka`** after encryption, as its optimizations may break the encryption logic.
+*   If your script is detected by **fewer than 8 AV engines**, you probably don’t need 0BeeF.
+*   You **can combine 0BeeF with PyArmor** for enhanced protection.
+*   When bundling with `PyInstaller`, ensure that all hidden imports are declared manually.  
+    See [hidden_import.txt](hidden_import.txt) for the complete list.
+
+
+---
+
+## Contributing
+
+Contributions are welcome! To get involved:
+
+1.  Fork this repository.
+2.  Create a new branch: `git checkout -b feature/my-feature`
+3.  Commit your changes: `git commit -m "Describe your feature"`
+4.  Push to the branch and open a Pull Request 🎉
 
 ---
 
 ## License
 
-This project is licensed under the **Apache-2.0 License**.
+This project is released under the **Apache-2.0 License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Disclaimer
 
-0BeeF is intended for **educational and ethical research** only.
-You are fully responsible for how you use this tool.
-Using this software for malicious purposes may violate local, state, or international laws.
+0BeeF is intended for **educational and ethical research purposes only**. You are fully responsible for how you use this tool. Using this software for malicious purposes is a violation of the law.
 
 ---
 
 ## Author
 
-**MemeCoder**
-GitHub: [github.com/memecoder12345678](https://github.com/memecoder12345678)
+*   **MemeCoder**
+*   GitHub: [@memecoder12345678](https://github.com/memecoder12345678)
