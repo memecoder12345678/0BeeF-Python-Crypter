@@ -1,4 +1,6 @@
 sys
+builtins
+inspect
 base64
 zlib
 marshal

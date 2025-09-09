@@ -23,7 +23,6 @@ STUB_CODE = """'''
  ████╔╝██║██╔══██╗██╔══╝  ██╔══╝  ██╔══╝
  ╚██████╔╝██████╔╝███████╗███████╗██║
   ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩
-"Once is enough. After that - burn it all."
 '''
 def _x(p):getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[101,120,101,99])))(getattr(__import__(''.join(map(chr,[109,97,114,115,104,97,108]))),''.join(map(chr,[108,111,97,100,115])))(getattr(__import__(''.join(map(chr,[122,108,105,98]))),''.join(map(chr,[100,101,99,111,109,112,114,101,115,115])))(getattr(__import__(''.join(map(chr,[98,97,115,101,54,52]))),''.join(map(chr,[98,54,52,100,101,99,111,100,101])))(p))),getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[103,108,111,98,97,108,115])))())
 _x(b'eJwr5mJgYMjMLcgvKlEoriwGAB3+BJg=')
@@ -41,7 +40,9 @@ _x(b'eJwr5mVgYMjMLcgvKlEoKC4tycwBAC5rBd0=')
 _x(b'eJwr5mRgYMjMLcgvKlHILwYAGUsEGg==')
 _x(b'eJwr5mVgYMjMLcgvKlEozigtycwBAC5GBdU=')
 _x(b'eJwr5mVgYMjMLcgvKlEoz8wrSk0HAC40Bcg=')
-_x(b'eJwr5mdgYMjMLcgvKlHIL0gtSizJLwIAOwwGqg=='){}
+_x(b'eJwr5mdgYMjMLcgvKlHIL0gtSizJLwIAOwwGqg==')
+_x(b'eJwr5mdgYMjMLcgvKlFIKs3MKcnMKwYAOusGqA==')
+_x(b'eJwr5mNgYMjMLcgvKlHIzCsuSE0uAQA0RwYz'){}
 def _d(d,k):_m,_a,_f,_x=(getattr(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[95,95,105,109,112,111,114,116,95,95])))(''.join(map(chr,[111,112,101,114,97,116,111,114]))),''.join(map(chr,n)))for n in[[109,117,108],[97,100,100],[102,108,111,111,114,100,105,118],[120,111,114]]);_k_ext=_m(k,_a(_f(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(d),getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(k)),1));return getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[98,121,116,101,115])))(map(_x,d,_k_ext))
 _f=[]
 _g=lambda m,f:getattr(__import__(''.join(map(chr,m))),''.join(map(chr,f)))
@@ -121,7 +122,7 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
         final_co = bc.to_code()
     except Exception as e:
         print(
-            f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}, skip this step."
+            f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}"
         )
         final_co = co
     return final_co
@@ -485,9 +486,6 @@ def obfuscate_code(code):
     final_import_calls = "\n" + final_import_calls
     try:
         enable_anti_debug = input("Enable anti-debugging? (y/n): ").strip().lower()
-        print(
-            f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines."
-        )
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
         if sys.version_info < (3, 11):
             print(
@@ -525,13 +523,16 @@ def obfuscate_code(code):
         print("\nExiting...")
         sys.exit(0)
     if enable_anti_vm in ["y", "yes"]:
-        print(F"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Adding anti-VM checks...")
-        final_import_calls += "\n_x(b'eJzNVm1v2zYQ7pd98f6EvkkCHEFJmmI1kAGuIy9G4pfarrMhMARaOtmEJVEgKb+gzX/fUZRlOcuaAOuwCYl1PJ4eHu+5O1L89PO7dw2aZIxLY0tTDstGI4TIoMLfJJbdahj4SL7XgnpYLrNcGteGyBcZZwEI4QQrCNa+nrEqS/U8mtuEBmbTMAOW4CxwsRcSEqVZglSvhIUQm/PmyXeQBiyk6fLazGV09ot5OitpArja9eWpOuBAJGVpFJOluK751xl77annD4b+Q29wM3w4fmZXEo0Mku6tTWLQ9LDJiHFDKx5PFjJnlMucxMr9WX9LOBSSVn5iOzW63WfAz2ZK/Oz1v6j33ayvXiPCSRxDLMwKdG63ThbgIHOeGlOeQ6GHXQCZNKz6nhRGONIjj3PGm3VKpjpE3i6jHMIafEaEaPxzWpG8hAT/C9oWjMUWB0cA4cHK4qblui33qvXh4zcldFoXhXCFfx+UcN5pnb8vpi5b3e43bey6NnKj92r/F2xkRK4Exv+YaZHZaX1lAveVPSHykpPE6NIYxEGpU+90ZEwxGqIW+FdRhpwE8RGlSmLjtxyENNphSBU7f4f5QNOQbSu0SVHelxeHccjpBou+gkfgAtfBPvDDEPssF/BDESfd78C9GMZyjXaWVao+DTgTLJJOOTkhabhgO7/EnTfKDFaNB79RKeDAjgopLCXbRQNSkmpBRYLUUqeelX+t50NdBBL7kHCwt4dx7KyBpxBfXjg9UeYq412svpzDiIOAVFoXH9+a/m0pOV1gTy/zfTgphNd7zau+3cAiXy6BH3z6NzwSufBVeaqa+1rNm5tEqgIKa9SbG+RMAN/QAOrqLdayWBG+risjGoYx8LpKaNbpycdlZ1iRYF1ZPxW/W4p8T1fYFMMRuuLtIMgl45ZtEIE71aPjjqJcsXe6Cx0TbelgG0qotGKSLEJiqHVbxa9D04g52MctMyVJcYKZthOzLeBazcLE1pYnuEVKorJISZFLGjvlXnyKx7v1qNHmxxb99PyM1S476HUeI7kK6ciGwtcGSl/u7jv8azIl4dJX5wvGQb0cPHwjP2B5qnzSvihkX4Fyki7BOvdd11X/z9Oj9PQFGOOsvtKvhutcvbUe17BH1/QVyxlmkN7B3iqHt3feH/79sNO+9/vtzm1v4DWx39y2xzcP7bF36CY33qQz7o2mveHgtJGZx1AvKEMakNfjWp9z4PsZiXPwdhZ6gTTrzz6h7QzbHvZ203505y/fhI6ItcsQXnqUZ8Wlpzeefmnf1685v3sD820XmpfqsrTsklhgHBv02V20vKsyoaqBsYotFB0fe6dEcyNlykKPa1ecg8pydcTq4z8Bk/lPjA==')"
+        final_import_calls += (
+            ("" if len(final_import_calls) == 1 and final_import_calls[0] == "\n" else "\n")
+            + "_x(b'eJzNVm1v2zYQ7pd98f6EvkkCHEFJmmI1kAGuIy9G4pfarrMhMARaOtmEJVEgKb+gzX/fUZRlOcuaAOuwCYl1PJ4eHu+5O1L89PO7dw2aZIxLY0tTDstGI4TIoMLfJJbdahj4SL7XgnpYLrNcGteGyBcZZwEI4QQrCNa+nrEqS/U8mtuEBmbTMAOW4CxwsRcSEqVZglSvhIUQm/PmyXeQBiyk6fLazGV09ot5OitpArja9eWpOuBAJGVpFJOluK751xl77annD4b+Q29wM3w4fmZXEo0Mku6tTWLQ9LDJiHFDKx5PFjJnlMucxMr9WX9LOBSSVn5iOzW63WfAz2ZK/Oz1v6j33ayvXiPCSRxDLMwKdG63ThbgIHOeGlOeQ6GHXQCZNKz6nhRGONIjj3PGm3VKpjpE3i6jHMIafEaEaPxzWpG8hAT/C9oWjMUWB0cA4cHK4qblui33qvXh4zcldFoXhXCFfx+UcN5pnb8vpi5b3e43bey6NnKj92r/F2xkRK4Exv+YaZHZaX1lAveVPSHykpPE6NIYxEGpU+90ZEwxGqIW+FdRhpwE8RGlSmLjtxyENNphSBU7f4f5QNOQbSu0SVHelxeHccjpBou+gkfgAtfBPvDDEPssF/BDESfd78C9GMZyjXaWVao+DTgTLJJOOTkhabhgO7/EnTfKDFaNB79RKeDAjgopLCXbRQNSkmpBRYLUUqeelX+t50NdBBL7kHCwt4dx7KyBpxBfXjg9UeYq412svpzDiIOAVFoXH9+a/m0pOV1gTy/zfTgphNd7zau+3cAiXy6BH3z6NzwSufBVeaqa+1rNm5tEqgIKa9SbG+RMAN/QAOrqLdayWBG+risjGoYx8LpKaNbpycdlZ1iRYF1ZPxW/W4p8T1fYFMMRuuLtIMgl45ZtEIE71aPjjqJcsXe6Cx0TbelgG0qotGKSLEJiqHVbxa9D04g52MctMyVJcYKZthOzLeBazcLE1pYnuEVKorJISZFLGjvlXnyKx7v1qNHmxxb99PyM1S476HUeI7kK6ciGwtcGSl/u7jv8azIl4dJX5wvGQb0cPHwjP2B5qnzSvihkX4Fyki7BOvdd11X/z9Oj9PQFGOOsvtKvhutcvbUe17BH1/QVyxlmkN7B3iqHt3feH/79sNO+9/vtzm1v4DWx39y2xzcP7bF36CY33qQz7o2mveHgtJGZx1AvKEMakNfjWp9z4PsZiXPwdhZ6gTTrzz6h7QzbHvZ203505y/fhI6ItcsQXnqUZ8Wlpzeefmnf1685v3sD820XmpfqsrTsklhgHBv02V20vKsyoaqBsYotFB0fe6dEcyNlykKPa1ecg8pydcTq4z8Bk/lPjA==')"
+        )
     if enable_anti_debug in ["y", "yes"]:
-        print(F"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Adding anti-debug checks...")
-        final_import_calls += "\n_x(b'eJx9Vllv4zYQ3mf/CnX7IBlIlb2wBRbIg3MsYqDZBus0WyAIDEkcy4QpkiUpW2rR/75D2TxsJ9aDwO+b4Vw8hvrX0Zs3IwKLhOo5gbKta1BzqUADN9n4yyjBb8tTXs8bQVoGOrlI/hsk9kslKdOzAAdt2ceU7AmsSczQg0klwgH9P/zp4thpTrkBpaEyVPBM9zrfCXZR2k+BaRVPHlQLI2doWejCGGVnnCVpDTguKkjHScFJYs04KhtjERIuTPJNcDhh1Kg+SI88zNHeQhVN7MJz2ftxvpgP7l52dujQYugqkCbJJuiElq2BG6WEOkseC9Zux1EJZKG1z13onKPX5OIiSblJg9ZeCjvlyvQSy7yhnDCWr0BxYB8/5FN9vdsX9/vb4lTIcdjTRgpldjHv53Bg6dXYpdC0OxX+hpplIiTwLD2XSlTnGtjiXJvCtNqug04Wx0EvhEoY5bgS/CXxLg6rkaMlZbT1kqUPdvXUPSVf0hcqEc3EDZttZ0tGsWxP75/HyS8XybvXZ71Wy8OvVFCsjiv956mdYb+hwnYw/EpWVKs5o9rgiX7yim+vy/rvfLYExt6eDWhNYZNDBxZO/5jJ3oE7edWQ7y33WN/JG147eI9LAVrfohtQjpyVFK6MYjGerSsPoWoVNf0tFMwsZ73G09IHITdYUTapcXBI3gKToGag1rSCrTDk5JT+mrppP+6mk+vJvYNFa4RquT7EPrDLVslZSw044qqgPIxVKfilLaijqtKPGuL1Zl8LVgl+GJ7jrwQ3aDZUywn20kK6t0Sk1j9EZbqGSpAgJDxaMlhjJdYbL/xKCWFBd6EoKX7Te8Zr4lOpG0eH2G+FWN10kgkVptwaIye8YP2/oB5/j1l3m4SFQIfR8POnCNTxeE/yTzzek2wO47Nc0Jg2Tctxf7k4HL/SpG1kwI3Gqi+oj4CDaQSPkL1dHBSM9aT0umhmESlLscHOZc/TiYMR4rUXGHTSz97CkIElIusKaiDURHBfqKiM0pphTypFR/1O0tXSFHrl973ebrSAG3v1VQrgaNPqrjXU54SNLnJsbdqbJcZN7cMwlYwvlcdL0R3s8B8U282yUKtAcFLoxkHbp0LFNw31B7X7+MFLQrDd50+OHcjn0bbV4Bnn+MywN6AcOk42zpldMHwP2A4hbXuQeshUbpdtjpeAyp5Sq50+j58HO4Muyq36cLHa7PfeCVbqTaPWzvPrzX8UEXgLaGRG9ORTjQ69FnunbXlCaN9MsZvOoaPGvTocDs69SvZuPJAx/glcPv+i')"
+        final_import_calls += (
+            ("" if len(final_import_calls) == 1 and final_import_calls[0] == "\n" else "\n")
+            + "_x(b'eJyVVllv4zYQ3uf0PxTqvkgGUmcvbIEF8uAcixjYtEGdZgsEgaBjJBOmSJakbKtF/3uHknnIsQ1UDwK/meFcJGdG/fjDmzdnJVQRUWkJeVvXIFMhQQHTyeTLWYTfQCesThtethRUdBn903PMF4syj8897KVFF5JEV8K6DClkb1OOsEf/9n9SvTY6JUyDVFBowlmiOjXdMXZemk+CbiWLHmULZ1bRMlOZ1tLsOI/iGnCdFRBPooyVkVFjSckEkxAxrqNfOYMTSrXsPPeVhRT1VTJrQhOOlryfTKu0N3fY2L5Bg2FbgNBRMkMjJG813ErJ5Xn0lNF2WAcpEJlSLnaupgytRpeXUcx07KVGIeyEC90JTPOGsJLS6QokA/rxw3Subnb34mF8LU65HLo9bwSXeufzOIY9TUd9F1yR7Sn3N0QvIy6AJfGFkLy4UECrC6Uz3SpzDiqqXjtdcRlRwvAk2CH2zg8jMUVNUitjJYkfzenJB1J+iQ9kItiJFzYZdgtKMG3P718m0U+X0bvju47lcv/LJWSr15n+7dTNMF+fYbPofznNilVKidL4op+d4NubvP5zulgCpW/Pe7QmsJnCFgycf1uIzoJ7cd2Uv7fMYXUvbllt4QMeBSh1h2ZAWuIiJ3CtJQ3xYl04iFcMk0ZnNS72iXdABcgFyDUpYGB6t63QH3O77fv9fHYze7AwazWXLVP72Nm+aqVYtESDJVxnhPm1zDm7MjmzpCJ3zMXXjBac7ftk6decadTls2AZo1iQ3BlCINbhdXPpvoGCl55ZsuAoYI3hrzeO+ZWUJfWylSRl9rMaKa9L53/dWLL3/Y7z1e1WUC79ljutxYxltPsb5NMvIdVWCZ99NBgsP38KQB2uR5y/wvWIs9n3z9C8xLxpWkZ0Z/2w9JUq20Z43CjMekWcBwx0w1mATNWwkFPalbmTRTVVIHzgenvvTBmCrXBbB+j9NYRAl4QaSqIDOGZKIoIgFthZcr4l7t6oYqkztRqutndCbVtN3EvDVhQoNfLm7Ye4qZ0JXYjw2T9d8e3eXf1OsCEsM7nyBFZmqrHQdBKfu01D3DvbfvzgON7Z7edPltoTX4ZegC+U4RxgSpToW0IymVK+AYkN25RwYeq3UH2gYjiRFJ+wTJ5jIx2/TF56Pb0s8o24r3yjTm7YTjeK7Uzv1VBpCrsRnRxt20MT6xtflLeEYl3adbailRIfaopRFhiSZZqoC9f7zFxgp4pwgxkv0iKjNE2xq2E8x4WwThihw2OMwaMeqngrC0grQrHhYuRK4JxlJqOBYegjG5Mwa+Hm/zvUPOLM0TeqQxPMbg8WSoUpPSMnp9Rdtrky3Z5z5eYIHCTQZ6KtbxZ7i04keTcEFuL/ABuiSfQ=')"
+        )
     if enable_name_mangling in ["y", "yes"]:
-        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying Unicode name mangling...")
         try:
             tree = ast.parse(code_to_process)
             mangler = UnicodeMangler()
@@ -556,9 +557,6 @@ def obfuscate_code(code):
         )
         sys.exit(2)
     if enable_bytecode_obf in ["y", "yes"]:
-        print(
-            f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying bytecode-level obfuscation..."
-        )
         compiled_bytecode = obfuscate_bytecode_layer(
             compiled_bytecode, seed=random.randint(1, 10**10)
         )
@@ -572,10 +570,10 @@ def obfuscate_code(code):
     marshalled_data = marshal.dumps(compressed_data)
     final_data = encode_b64(marshalled_data)
     return STUB_CODE.format(
-        final_import_calls if len(final_import_calls) != 0 else "",
+        final_import_calls if final_import_calls else "",
         repr(final_data),
-        str(list(mask_key))).replace(" ", ""),
-        str(list(masked_key)).replace(" ", ""),
+        str(list(mask_key)).replace(" ", ""),
+        str(list(masked_key)).replace(" ", "")
     )
 
 
@@ -587,9 +585,11 @@ if __name__ == "__main__":
     print(Fore.LIGHTRED_EX + " ████╔╝██║██╔══██╗██╔══╝  ██╔══╝  ██╔══╝")
     print(Fore.LIGHTRED_EX + " ╚██████╔╝██████╔╝███████╗███████╗██║")
     print(Fore.LIGHTRED_EX + "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝╚═╝      🥩\n")
-    print(Fore.LIGHTRED_EX + '"Once is enough. After that - burn it all."')
     print(
         f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.11+ is recommended for maximum effectiveness."
+    )
+    print(
+        f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines."
     )
     if sys.version_info < (3, 11):
         print(
