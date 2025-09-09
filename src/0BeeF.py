@@ -458,8 +458,8 @@ def obfuscate_code(code):
     return STUB_CODE.format(
         final_import_calls if len(final_import_calls) != 0 else "",
         repr(final_data),
-        list(mask_key),
-        list(masked_key),
+        str(list(mask_key))).replace(" ", ""),
+        str(list(masked_key)).replace(" ", ""),
     )
 
 
@@ -500,3 +500,4 @@ if __name__ == "__main__":
     print(
         f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Crypted file created: {os.path.abspath(output_filename)}"
     )
+
