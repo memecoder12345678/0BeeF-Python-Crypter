@@ -69,7 +69,8 @@ _p4=_f[1](_p3)
 _v_d_b=getattr(_v_c,''.join(map(chr,[100,101,99,114,121,112,116])))(_p4)
 _v_m=_f[6](_v_d_b)
 _f[7](_f[2](getattr(_v_m,''.join(map(chr,[116,111,98,121,116,101,115])))()),getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[103,108,111,98,97,108,115])))())
-try:for _p in[0,255,_f[12](0,255)]:getattr(_f[11](_f[10](_f[9],''.join(map(chr,[102,114,111,109,95,98,117,102,102,101,114])))(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[98,121,116,101,97,114,114,97,121])))(_v_d_b))),_p,getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(_v_d_b));getattr(_f[11](_f[10](_f[9],''.join(map(chr,[102,114,111,109,95,98,117,102,102,101,114])))(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[98,121,116,101,97,114,114,97,121])))(_v_m))),_p,getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(_v_m))
+try:
+ for _p in[0,255,_f[12](0,255)]:getattr(_f[11](_f[10](_f[9],''.join(map(chr,[102,114,111,109,95,98,117,102,102,101,114])))(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[98,121,116,101,97,114,114,97,121])))(_v_d_b))),_p,getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(_v_d_b));getattr(_f[11](_f[10](_f[9],''.join(map(chr,[102,114,111,109,95,98,117,102,102,101,114])))(getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[98,121,116,101,97,114,114,97,121])))(_v_m))),_p,getattr(__import__(''.join(map(chr,[98,117,105,108,116,105,110,115]))),''.join(map(chr,[108,101,110])))(_v_m))
 except:pass
 del _d_f,_k_m,_k_md,_v_k,_v_c,_p1,_p2,_p3,_p4,_v_d_b,_v_m,_f,_g,_b"""
 
@@ -98,14 +99,12 @@ def _collect_imported_names(co: types.CodeType) -> set:
 def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.CodeType:
     if seed is not None:
         random.seed(seed)
-
     processed_consts = []
     for c in co.co_consts:
         if isinstance(c, types.CodeType):
             processed_consts.append(obfuscate_bytecode_layer(c, seed=seed))
         else:
             processed_consts.append(c)
-
     builtins_set = set(dir(__builtins__))
     specials = {
         n
@@ -114,7 +113,6 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
     }
     imported = _collect_imported_names(co)
     protect_names = builtins_set | specials | imported
-
     try:
         bc = bytecode.Bytecode.from_code(co)
         bc.consts = shuffle_list(processed_consts, protect={None})
@@ -126,7 +124,6 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
             f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}, skip this step."
         )
         final_co = co
-
     return final_co
 
 
@@ -283,6 +280,111 @@ def xor_encrypt(data, key):
     )
 
 
+class _NameGenerator:
+    def __init__(self):
+        self.chaotic_ranges = [
+            (0x0370, 0x03FF),
+            (0x0400, 0x04FF),
+            (0x0590, 0x05FF),
+            (0x0600, 0x06FF),
+            (0x20A0, 0x20CF),
+            (0x2100, 0x214F),
+            (0x2200, 0x22FF),
+            (0x25A0, 0x25FF),
+        ]
+        self.combining_chars_range = (0x0300, 0x036F)
+        self.invisible_chars = ["\u200b", "\u200c", "\u200d"]
+
+    def _get_random_char_from_ranges(self):
+        start, end = random.choice(self.chaotic_ranges)
+        return chr(random.randint(start, end))
+
+    def _get_random_combining_char(self):
+        return chr(random.randint(*self.combining_chars_range))
+
+    def generate(self, min_len=8, max_len=16):
+        while True:
+            length = random.randint(min_len, max_len)
+            name = self._get_random_char_from_ranges()
+            for _ in range(length - 1):
+                if random.random() < 0.8:
+                    name += self._get_random_char_from_ranges()
+                else:
+                    name += self._get_random_combining_char()
+            if random.random() < 0.5:
+                pos = random.randint(1, len(name) - 1)
+                name = name[:pos] + random.choice(self.invisible_chars) + name[pos:]
+            if name.isidentifier():
+                return name
+
+
+class UnicodeMangler(ast.NodeTransformer):
+    def __init__(self):
+        super().__init__()
+        self.names_to_mangle = set()
+        self.name_map = {}
+        self.protected_names = set(dir(__builtins__)) | {"_x", "_d"}
+        self._name_generator = _NameGenerator()
+
+    class _NameCollector(ast.NodeVisitor):
+        def __init__(self, mangler_instance):
+            self.mangler = mangler_instance
+
+        def visit_Name(self, node):
+            if (
+                isinstance(node.ctx, ast.Store)
+                and node.id not in self.mangler.protected_names
+            ):
+                self.mangler.names_to_mangle.add(node.id)
+            self.generic_visit(node)
+
+        def visit_arg(self, node):
+            if node.arg not in self.mangler.protected_names:
+                self.mangler.names_to_mangle.add(node.arg)
+            self.generic_visit(node)
+
+        def visit_FunctionDef(self, node):
+            if node.name not in self.mangler.protected_names:
+                self.mangler.names_to_mangle.add(node.name)
+            self.generic_visit(node)
+
+        def visit_ClassDef(self, node):
+            if node.name not in self.mangler.protected_names:
+                self.mangler.names_to_mangle.add(node.name)
+            self.generic_visit(node)
+
+    def _rename_if_needed(self, original_name):
+        if original_name in self.names_to_mangle:
+            if original_name not in self.name_map:
+                self.name_map[original_name] = self._name_generator.generate()
+            return self.name_map[original_name]
+        return original_name
+
+    def visit_Name(self, node):
+        node.id = self._rename_if_needed(node.id)
+        return node
+
+    def visit_arg(self, node):
+        node.arg = self._rename_if_needed(node.arg)
+        return node
+
+    def visit_FunctionDef(self, node):
+        node.name = self._rename_if_needed(node.name)
+        self.generic_visit(node)
+        return node
+
+    def visit_ClassDef(self, node):
+        node.name = self._rename_if_needed(node.name)
+        self.generic_visit(node)
+        return node
+
+    def mangle(self, tree: ast.AST) -> ast.AST:
+        collector = self._NameCollector(self)
+        collector.visit(tree)
+        mangled_tree = self.visit(tree)
+        return mangled_tree
+
+
 class StringObfuscator(ast.NodeTransformer):
     def __init__(self):
         self.in_fstring = False
@@ -301,9 +403,7 @@ class StringObfuscator(ast.NodeTransformer):
             if isinstance(node.parent, ast.Expr) and node.parent.value is node:
                 return node
             key = os.urandom(8)
-
             encrypted = base64.b64encode(xor_encrypt(node.value.encode(), key)).decode()
-
             return ast.Call(
                 func=ast.Attribute(
                     value=ast.Call(
@@ -335,18 +435,15 @@ def obfuscate_strings(code):
     try:
         tree = ast.parse(code)
         transformer = StringObfuscator()
-
         for node in ast.walk(tree):
             for child in ast.iter_child_nodes(node):
                 child.parent = node
-
         new_tree = transformer.visit(tree)
         ast.fix_missing_locations(new_tree)
         return ast.unparse(new_tree)
     except Exception as e:
         print(f"[{Fore.YELLOW}!{Fore.RESET}] String obfuscation failed: {e}")
         import traceback
-
         traceback.print_exc()
         return code
 
@@ -394,6 +491,10 @@ def obfuscate_code(code):
         enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
         if sys.version_info < (3, 11):
             print(
+                f"[{Fore.YELLOW}!{Fore.RESET}] Unicode name mangling requires Python 3.11+ to work properly."
+            )
+            enable_name_mangling = "n"
+            print(
                 f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening requires Python 3.11+ to work properly."
             )
             enable_flatten = "n"
@@ -406,6 +507,9 @@ def obfuscate_code(code):
             )
             enable_bytecode_obf = "n"
         else:
+            enable_name_mangling = (
+                input("Enable Unicode name mangling? (y/n): ").strip().lower()
+            )
             enable_flatten = (
                 input("Enable control flow flattening? (y/n): ").strip().lower()
             )
@@ -413,20 +517,32 @@ def obfuscate_code(code):
                 input("Enable string obfuscation? (y/n): ").strip().lower()
             )
             enable_bytecode_obf = (
-                input(
-                    "Enable bytecode obfuscation (shuffle constants)? (y/n): "
-                )
+                input("Enable bytecode obfuscation (shuffle constants)? (y/n): ")
                 .strip()
                 .lower()
             )
-
     except KeyboardInterrupt:
         print("\nExiting...")
         sys.exit(0)
     if enable_anti_vm in ["y", "yes"]:
+        print(F"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Adding anti-VM checks...")
         final_import_calls += "\n_x(b'eJzNVm1v2zYQ7pd98f6EvkkCHEFJmmI1kAGuIy9G4pfarrMhMARaOtmEJVEgKb+gzX/fUZRlOcuaAOuwCYl1PJ4eHu+5O1L89PO7dw2aZIxLY0tTDstGI4TIoMLfJJbdahj4SL7XgnpYLrNcGteGyBcZZwEI4QQrCNa+nrEqS/U8mtuEBmbTMAOW4CxwsRcSEqVZglSvhIUQm/PmyXeQBiyk6fLazGV09ot5OitpArja9eWpOuBAJGVpFJOluK751xl77annD4b+Q29wM3w4fmZXEo0Mku6tTWLQ9LDJiHFDKx5PFjJnlMucxMr9WX9LOBSSVn5iOzW63WfAz2ZK/Oz1v6j33ayvXiPCSRxDLMwKdG63ThbgIHOeGlOeQ6GHXQCZNKz6nhRGONIjj3PGm3VKpjpE3i6jHMIafEaEaPxzWpG8hAT/C9oWjMUWB0cA4cHK4qblui33qvXh4zcldFoXhXCFfx+UcN5pnb8vpi5b3e43bey6NnKj92r/F2xkRK4Exv+YaZHZaX1lAveVPSHykpPE6NIYxEGpU+90ZEwxGqIW+FdRhpwE8RGlSmLjtxyENNphSBU7f4f5QNOQbSu0SVHelxeHccjpBou+gkfgAtfBPvDDEPssF/BDESfd78C9GMZyjXaWVao+DTgTLJJOOTkhabhgO7/EnTfKDFaNB79RKeDAjgopLCXbRQNSkmpBRYLUUqeelX+t50NdBBL7kHCwt4dx7KyBpxBfXjg9UeYq412svpzDiIOAVFoXH9+a/m0pOV1gTy/zfTgphNd7zau+3cAiXy6BH3z6NzwSufBVeaqa+1rNm5tEqgIKa9SbG+RMAN/QAOrqLdayWBG+risjGoYx8LpKaNbpycdlZ1iRYF1ZPxW/W4p8T1fYFMMRuuLtIMgl45ZtEIE71aPjjqJcsXe6Cx0TbelgG0qotGKSLEJiqHVbxa9D04g52MctMyVJcYKZthOzLeBazcLE1pYnuEVKorJISZFLGjvlXnyKx7v1qNHmxxb99PyM1S476HUeI7kK6ciGwtcGSl/u7jv8azIl4dJX5wvGQb0cPHwjP2B5qnzSvihkX4Fyki7BOvdd11X/z9Oj9PQFGOOsvtKvhutcvbUe17BH1/QVyxlmkN7B3iqHt3feH/79sNO+9/vtzm1v4DWx39y2xzcP7bF36CY33qQz7o2mveHgtJGZx1AvKEMakNfjWp9z4PsZiXPwdhZ6gTTrzz6h7QzbHvZ203505y/fhI6ItcsQXnqUZ8Wlpzeefmnf1685v3sD820XmpfqsrTsklhgHBv02V20vKsyoaqBsYotFB0fe6dEcyNlykKPa1ecg8pydcTq4z8Bk/lPjA==')"
     if enable_anti_debug in ["y", "yes"]:
+        print(F"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Adding anti-debug checks...")
         final_import_calls += "\n_x(b'eJx9Vllv4zYQ3mf/CnX7IBlIlb2wBRbIg3MsYqDZBus0WyAIDEkcy4QpkiUpW2rR/75D2TxsJ9aDwO+b4Vw8hvrX0Zs3IwKLhOo5gbKta1BzqUADN9n4yyjBb8tTXs8bQVoGOrlI/hsk9kslKdOzAAdt2ceU7AmsSczQg0klwgH9P/zp4thpTrkBpaEyVPBM9zrfCXZR2k+BaRVPHlQLI2doWejCGGVnnCVpDTguKkjHScFJYs04KhtjERIuTPJNcDhh1Kg+SI88zNHeQhVN7MJz2ftxvpgP7l52dujQYugqkCbJJuiElq2BG6WEOkseC9Zux1EJZKG1z13onKPX5OIiSblJg9ZeCjvlyvQSy7yhnDCWr0BxYB8/5FN9vdsX9/vb4lTIcdjTRgpldjHv53Bg6dXYpdC0OxX+hpplIiTwLD2XSlTnGtjiXJvCtNqug04Wx0EvhEoY5bgS/CXxLg6rkaMlZbT1kqUPdvXUPSVf0hcqEc3EDZttZ0tGsWxP75/HyS8XybvXZ71Wy8OvVFCsjiv956mdYb+hwnYw/EpWVKs5o9rgiX7yim+vy/rvfLYExt6eDWhNYZNDBxZO/5jJ3oE7edWQ7y33WN/JG147eI9LAVrfohtQjpyVFK6MYjGerSsPoWoVNf0tFMwsZ73G09IHITdYUTapcXBI3gKToGag1rSCrTDk5JT+mrppP+6mk+vJvYNFa4RquT7EPrDLVslZSw044qqgPIxVKfilLaijqtKPGuL1Zl8LVgl+GJ7jrwQ3aDZUywn20kK6t0Sk1j9EZbqGSpAgJDxaMlhjJdYbL/xKCWFBd6EoKX7Te8Zr4lOpG0eH2G+FWN10kgkVptwaIye8YP2/oB5/j1l3m4SFQIfR8POnCNTxeE/yTzzek2wO47Nc0Jg2Tctxf7k4HL/SpG1kwI3Gqi+oj4CDaQSPkL1dHBSM9aT0umhmESlLscHOZc/TiYMR4rUXGHTSz97CkIElIusKaiDURHBfqKiM0pphTypFR/1O0tXSFHrl973ebrSAG3v1VQrgaNPqrjXU54SNLnJsbdqbJcZN7cMwlYwvlcdL0R3s8B8U282yUKtAcFLoxkHbp0LFNw31B7X7+MFLQrDd50+OHcjn0bbV4Bnn+MywN6AcOk42zpldMHwP2A4hbXuQeshUbpdtjpeAyp5Sq50+j58HO4Muyq36cLHa7PfeCVbqTaPWzvPrzX8UEXgLaGRG9ORTjQ69FnunbXlCaN9MsZvOoaPGvTocDs69SvZuPJAx/glcPv+i')"
+    if enable_name_mangling in ["y", "yes"]:
+        print(f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Applying Unicode name mangling...")
+        try:
+            tree = ast.parse(code_to_process)
+            mangler = UnicodeMangler()
+            mangled_tree = mangler.mangle(tree)
+            ast.fix_missing_locations(mangled_tree)
+            code_to_process = ast.unparse(mangled_tree)
+        except Exception as e:
+            print(f"[{Fore.YELLOW}!{Fore.RESET}] Name mangling failed: {e}")
+            import traceback
+
+            traceback.print_exc()
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
     if enable_string_obf in ["y", "yes"]:
