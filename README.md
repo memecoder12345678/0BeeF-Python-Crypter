@@ -54,7 +54,7 @@ It offers:
 
 ## Effectiveness Demo
 
-Here is a real-world result of using 0BeeF on a Python-based stealer. The detection rate was **reduced by approximately 62.5%**.
+Here is a real-world result of using 0BeeF on a Python-based ransomware. The detection rate was **reduced by approximately 62.5%** (The file was compiled with **PyInstaller**, and some libraries required by 0BeeF may cause it to be **flagged**.)
 
 ### Before encryption:
 
