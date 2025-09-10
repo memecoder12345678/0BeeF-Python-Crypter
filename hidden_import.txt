@@ -5,12 +5,12 @@ base64
 zlib
 marshal
 ctypes
-cryptography
+cryptography.fernet
 random
 re
 subprocess
 time
-concurrent
+concurrent.futures
 psutil
 os
 shutil
