@@ -38,7 +38,6 @@ It offers:
 
 *   A multi-layer encryption mechanism to protect payloads.
 *   Fully in-memory execution to evade static analysis.
-*   Anti-debugging and anti-VM techniques.
 *   Bytecode-level obfuscation.
 *   A simple, easy-to-use command-line interface.
 
@@ -72,7 +71,6 @@ Here is a real-world result of using 0BeeF on a Python-based ransomware. The det
 * **In-Memory Execution** — The payload is decrypted and run entirely in RAM.
 * **Memory Wiping** — Automatically clears traces after execution.
 * **Bytecode Obfuscation** — Resists static analysis and reverse engineering.
-* **Anti-Debug & Anti-VM** — Detects and evades analysis environments.
 * **High Compatibility** — Works well with PyInstaller and similar tools.
 
 ---
